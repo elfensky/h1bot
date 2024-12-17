@@ -1,0 +1,49 @@
+{
+    "name": "h1bot",
+    "version": "0.0.1",
+    "description": "discord bot to notify helldivers about planetary defense events",
+    "keywords": [
+        "discord",
+        "bot",
+        "helldivers",
+        "gaming",
+        "community",
+        "event"
+    ],
+    "homepage": "https://github.com/elfensky/h1bot#readme",
+    "bugs": {
+        "url": "https://github.com/elfensky/h1bot/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/elfensky/h1bot.git"
+    },
+    "license": "ISC",
+    "author": "Andrei Lavrenov",
+    "type": "commonjs",
+    "main": "index.js",
+    "scripts": {
+        "dev": "nodemon index.js",
+        "deploy": "node deploy-commands.js",
+        "start": "NODE_ENV=production node index.js"
+    },
+    "volta": {
+        "node": "22.12.0",
+        "npm": "11.0.0"
+    },
+    "dependencies": {
+        "axios": "^1.7.9",
+        "cron": "^3.3.1",
+        "discord.js": "^14.16.3",
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "form-data": "^4.0.1",
+        "pino": "^7.0.0-rc.9",
+        "sequelize": "^6.37.5",
+        "sqlite3": "^5.1.7"
+    },
+    "devDependencies": {
+        "eslint": "^9.17.0",
+        "nodemon": "^3.1.9"
+    }
+}

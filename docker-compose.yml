@@ -1,0 +1,9 @@
+services:
+    h1bot:
+        image: elfensky/h1bot:latest # Replace with the correct image name and tag
+        container_name: h1bot # Optional: name your container
+        env_file:
+            - .env
+        volumes:
+            - /path/on/host:/app/data
+        restart: unless-stopped # Automatically restart the container unless it is explicitly stopped
