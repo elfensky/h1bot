@@ -2,13 +2,11 @@
 const fs = require('node:fs');
 const { CronJob } = require('cron');
 const path = require('node:path');
-const axios = require('axios');
-const https = require('https');
 const dotenv = require('dotenv');
-const FormData = require('form-data');
+const pino = require('pino');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-
-const data = require('./db/data.json');
+//api data
+const getCampaignStatus = require('./api/getCampaignStatus');
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -73,37 +71,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
-// Function to ping the API
-async function getCampaignStatus() {
-    // The API URL you want to ping
-    const url = 'https://api.helldiversgame.com/1.0/';
-    const form = new FormData();
-    form.append('action', 'get_campaign_status');
-
-    const agent = new https.Agent({
-        rejectUnauthorized: false,
-    });
-
-    try {
-        // Make the POST request
-        axios
-            .post(url, form, {
-                httpsAgent: agent,
-                headers: {
-                    ...form.getHeaders(), // Set the correct headers for form data
-                },
-            })
-            .then((response) => {
-                return response.json();
-                // console.log('Response:', response.data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    } catch (error) {
-        console.error('Error pinging API:', error);
-    }
-}
+const enemies = {
+    0: 'Bugs',
+    1: 'Cyborgs',
+    2: 'The Illuminate',
+};
 
 // When the client is ready, run this code (only once).
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
@@ -112,17 +84,6 @@ client.once(Events.ClientReady, (readyClient) => {
     // Tags.sync(); // Sync the Tags table
 
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-
-    const checkApiEveryMinute = new CronJob(
-        '* * * * *',
-        () => {
-            console.log('Checking API...');
-            // getCampaignStatus();,
-        },
-        null, // No onComplete function
-        true, // Start the job right now)
-        'Europe/Brussels' // Time zone);
-    );
 
     const postDefenseEvent = new CronJob(
         '* * * * *',
@@ -133,14 +94,52 @@ client.once(Events.ClientReady, (readyClient) => {
 
             const now = new Date();
 
-            channel.send(`posting about defence: ${now}`);
+            getCampaignStatus()
+                .then((data) => {
+                    const json = JSON.stringify(data.defend_event);
+
+                    if (data.defend_event.status === 'active') {
+                        channel.send(
+                            `**${
+                                enemies[data.defend_event.enemy]
+                            }** are attacking **sector ${
+                                data.defend_event.region
+                            }**`
+                        );
+                    }
+                    if (data.defend_event.status === 'success') {
+                        console.log(
+                            `we have successfully defended sector ${
+                                data.defend_event.region
+                            } from ${enemies[data.defend_event.enemy]}`
+                        );
+                        // channel.send(
+                        //     `we have successfully defended **sector ${
+                        //         data.defend_event.region
+                        //     }** from **${enemies[data.defend_event.enemy]}**`
+                        // );
+                    }
+                    if (data.defend_event.status === 'fail') {
+                        console.log(
+                            `we have lost sector ${
+                                data.defend_event.region
+                            } to ${enemies[data.defend_event.enemy]}`
+                        );
+                        // channel.send(
+                        //     `we have lost sector **${
+                        //         data.defend_event.region
+                        //     }** to **${enemies[data.defend_event.enemy]}**`
+                        // );
+                    }
+                })
+                .catch((error) =>
+                    console.error('Failed to get campaign status:', error)
+                );
         },
         null, // No onComplete function
         true, // Start the job right now)
         'Europe/Brussels' // Time zone);
     );
-
-    postDefenseEvent.start();
 });
 
 // Log in to Discord with your client's token

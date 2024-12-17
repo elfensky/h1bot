@@ -20,3 +20,13 @@ GUILD_ID=your-guild-id-here
 
 3. Run `npm run dev` to start the bot
 4. Run `npm run deploy` to deploy the commands to your server
+
+## Docker
+
+#### Build local
+
+docker build -t elfensky/h1bot .
+
+#### Build production
+
+docker buildx build --platform linux/amd64 -t elfensky/h1bot:latest . --push

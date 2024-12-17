@@ -35,7 +35,9 @@
         "cron": "^3.3.1",
         "discord.js": "^14.16.3",
         "dotenv": "^16.4.7",
+        "express": "^4.21.2",
         "form-data": "^4.0.1",
+        "pino": "^7.0.0-rc.9",
         "sequelize": "^6.37.5",
         "sqlite3": "^5.1.7"
     },
