@@ -88,17 +88,33 @@ client.once(Events.ClientReady, (readyClient) => {
     const postDefenseEvent = new CronJob(
         '* * * * *',
         () => {
-            console.log('Posting defense event...');
+            // console.log('Posting defense event...');
             const guild = client.guilds.cache.get(guildId);
             const channel = guild.channels.cache.get(channelId);
 
             const now = new Date();
+
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const time = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
             getCampaignStatus()
                 .then((data) => {
                     const json = JSON.stringify(data.defend_event);
 
                     if (data.defend_event.status === 'active') {
+                        console.log(
+                            `${time} | **${
+                                enemies[data.defend_event.enemy]
+                            }** are attacking **sector ${
+                                data.defend_event.region
+                            }**`
+                        );
                         channel.send(
                             `**${
                                 enemies[data.defend_event.enemy]
@@ -109,7 +125,7 @@ client.once(Events.ClientReady, (readyClient) => {
                     }
                     if (data.defend_event.status === 'success') {
                         console.log(
-                            `we have successfully defended sector ${
+                            `${time} | we have successfully defended sector ${
                                 data.defend_event.region
                             } from ${enemies[data.defend_event.enemy]}`
                         );
@@ -121,7 +137,7 @@ client.once(Events.ClientReady, (readyClient) => {
                     }
                     if (data.defend_event.status === 'fail') {
                         console.log(
-                            `we have lost sector ${
+                            `${time} | we have lost sector ${
                                 data.defend_event.region
                             } to ${enemies[data.defend_event.enemy]}`
                         );
