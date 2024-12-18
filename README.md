@@ -52,3 +52,8 @@ services:
 ```
 
 4. run `docker-compose up -d` to start the bot
+
+#### Updates
+
+1. `docker pull elfensky/h1bot:latest` to pull the latest version
+2. `docker-compose up -d` to recreate and restart the container
