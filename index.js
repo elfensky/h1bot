@@ -1,11 +1,15 @@
-// Require the necessary discord.js classes
+// logs, monitoring, etc
+require('./instrument.js'); //sentry.io
+const pino = require('pino'); //low overhead nodejs logger
+const chalk = require('chalk'); //colorful terminal output
+// dependencies
 const fs = require('node:fs');
-const { CronJob } = require('cron');
 const path = require('node:path');
 const dotenv = require('dotenv');
-const pino = require('pino');
+const { CronJob } = require('cron');
+// discord.js components
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-//api data
+// api data
 const getCampaignStatus = require('./api/getCampaignStatus');
 
 dotenv.config(); // Load environment variables from .env file
