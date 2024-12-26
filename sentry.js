@@ -3,7 +3,7 @@ const Sentry = require('@sentry/node');
 const { nodeProfilingIntegration } = require('@sentry/profiling-node');
 
 Sentry.init({
-    dsn: 'https://93b83d0a54777abc1a10a35afb3ddb65@o4506104681201664.ingest.us.sentry.io/4508488540618752',
+    dsn: 'https://394e3fdeab03c62753cfae9318e12d4c@o4508531381895168.ingest.de.sentry.io/4508535082909776',
     integrations: [nodeProfilingIntegration()],
     // Tracing
     tracesSampleRate: 1.0, //  Capture 100% of the transactions
@@ -12,16 +12,16 @@ Sentry.init({
 // to profile the code in between
 Sentry.profiler.startProfiler();
 
-// Starts a transaction that will also be profiled
-Sentry.startSpan(
-    {
-        name: 'My First Transaction',
-    },
-    () => {
-        // the code executing inside the transaction will be wrapped in a span and profiled
-    }
-);
+// // Starts a transaction that will also be profiled
+// Sentry.startSpan(
+//     {
+//         name: 'My First Transaction',
+//     },
+//     () => {
+//         // the code executing inside the transaction will be wrapped in a span and profiled
+//     }
+// );
 
 // Calls to stopProfiling are optional - if you don't stop the profiler, it will keep profiling
 // your application until the process exits or stopProfiling is called.
-Sentry.profiler.stopProfiler();
+// Sentry.profiler.stopProfiler();

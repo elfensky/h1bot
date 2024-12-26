@@ -1,8 +1,8 @@
 # TODO
 
--   finish and publish my own api cache
--   update bot to use it
--   make sure it updates an existing message instead of spamming chat
+-   ✅ finish and publish my own api cache
+-   ✅ update bot to use it
+-   ✅ make sure it updates an existing message instead of spamming chat
 
     -   2 separate messages each day:
     -   one for defense and one for campaign info
@@ -13,6 +13,12 @@
             Defend the `polaris region || super earth` against the Cyborgs.
             Points: 742/1227 (60.5%) points
             Time remaining: 00 hours 05 minutes and 33 seconds
+
+            -
+
+            A Glorious Victory for Democracy, blablabla
+
+            A inglorious defeat. Do better, Helldiver.
 
         -   ## 31st day of the 142nd Galatic War
 

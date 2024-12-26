@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-// const getCampaignStatus = require('../../api/getCampaignStatus');
+// const getOfficialCampaignStatus = require('../../api/getOfficialCampaignStatus');
 const fs = require('fs');
 const path = require('path');
 

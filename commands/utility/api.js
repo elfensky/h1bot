@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const getCampaignStatus = require('../../api/getCampaignStatus');
+const getOfficialCampaignStatus = require('../../api/getOfficialCampaignStatus');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,7 +10,7 @@ module.exports = {
     async execute(interaction) {
         try {
             // Fetch the campaign status
-            const data = await getCampaignStatus();
+            const data = await getOfficialCampaignStatus();
             // console.log(data);
 
             // Convert the data to a JSON string

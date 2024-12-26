@@ -1,9 +1,15 @@
 services:
     h1bot:
-        image: elfensky/h1bot:latest # Replace with the correct image name and tag
+        image: elfensky/h1bot:latest
         container_name: h1bot # Optional: name your container
-        env_file:
-            - .env
-        volumes:
-            - /path/on/host:/app/data
-        restart: unless-stopped # Automatically restart the container unless it is explicitly stopped
+        environment:
+            - DATABASE_URL=${DATABASE_URL} #mysql database
+            - SENTRY_DSN=${SENTRY_DSN} #sentry.io
+            - TOKEN=${TOKEN} #discord access token
+            - CLIENT_ID=${CLIENT_ID} #application id
+            - GUILD_ID=${GUILD_ID} #discord server id, this is lavrenov.io
+            - CHANNEL_ID=${CHANNEL_ID} #chat channel
+        restart: unless-stopped
+        network_mode: bridge # Use the default, ufw-whitelisted Docker Network
+        extra_hosts:
+            - 'host.docker.internal:host-gateway' # pass the host to container, required on linux
