@@ -85,7 +85,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, (readyClient) => {
-    // runMigrations();
+    runMigrations();
 
     const guild = client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(channelId);
@@ -93,8 +93,6 @@ client.once(Events.ClientReady, (readyClient) => {
     log.info(
         chalk.white('APP - logged in as ') + chalk.yellow(readyClient.user.tag)
     );
-
-    updateEvent(channel);
 
     const eventUpdate = new CronJob(
         '* * * * *',

@@ -106,7 +106,7 @@ Last updated at \`${humanTime} UTC+0\` \n
 **💀 SHAMEFUL DEFEAT**
 **Our glorious democracy** has been defeated in the **${
             map[data.enemy][data.region]
-        }**
+        }** by **${enemies[data.enemy]}**
 Progress: ${bar}
 Points: \`${data.points}/${data.points_max}\`
 
@@ -120,7 +120,7 @@ Last updated at \`${humanTime} UTC+0\` \n
 **✅ GLORIOUS VICTORY**
 **Helldivers** have successfully defended the **${
             map[data.enemy][data.region]
-        }**
+        }** against **${enemies[data.enemy]}**
 Progress: \`${bar}\`
 Points: \`${data.points}/${data.points_max}\`
 
