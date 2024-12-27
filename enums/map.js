@@ -1,6 +1,6 @@
 const map = {
     helldivers: {
-        0: 'Sol System',
+        0: 'Super Earth', //Sol System
     },
     0: {
         // Bugs
@@ -14,7 +14,7 @@ const map = {
         7: 'Hawking Region',
         8: 'Rigel System',
         9: 'Aurigae Region',
-        10: 'Kepler System', //Kepler Prime, Bugs Homeworld
+        10: 'Kepler Prime', //Kepler System, Bugs Homeworld
     },
     1: {
         // Cyborgs
@@ -23,26 +23,26 @@ const map = {
         2: 'Pictor Sector',
         3: 'Sagan Region',
         4: 'Horolium System',
-        5: 'Gellert Region	',
+        5: 'Gellert Region',
         6: 'Lacaille Region',
         7: 'Indi System',
         8: 'Ceti System',
         9: 'Cygni Region',
-        10: 'Cyberstan Region', //Cyberstan, Cyborg Homeworld
+        10: 'Cyberstan', //Cyberstan Region
     },
     2: {
         // The Illuminate
-        0: 'Centaury Region',
-        1: 'Procyon Region',
-        2: 'Castor System',
-        3: 'Orionis Region',
-        4: 'Prometheus System',
-        5: 'Cassiopaiae Region',
-        6: 'Ursa Region',
-        7: 'Canes Region',
-        8: 'Arcturus Region',
-        9: "Squ'bai System", //Squ'bai Shrine, Illuminate Homeworld
-        10: "Squ'bai System", //Squ'bai Shrine, Illuminate Homeworld
+        0: 'Unknown Region',
+        1: 'Centaury Region',
+        2: 'Procyon Region',
+        3: 'Castor System',
+        4: 'Orionis Region',
+        5: 'Prometheus System',
+        6: 'Cassiopaiae Region',
+        7: 'Ursa Region',
+        8: 'Canes Region',
+        9: 'Arcturus Region',
+        10: "Squ'bai Shrine", //Squ'bai System
     },
 };
 

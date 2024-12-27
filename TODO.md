@@ -4,10 +4,17 @@
 -   ✅ update bot to use it
 -   make sure it updates an existing message instead of spamming chat
 
-    -   2 separate messages each day:
-    -   one for defense and one for campaign info
+# REWRITE DEFENCE LOGIC:
 
-        -   ## Defense
+1. Get Event.Active status from database
+2. If active, update message
+   --> get info from API and update message
+3. If not active, do nothing.
+
+    - 2 separate messages each day:
+    - one for defense and one for campaign info
+
+        - ## Defense
 
             🚨 Our glorious democracy is under attack by the Cyborgs. 🚨
             Defend the `polaris region || super earth` against the Cyborgs.
@@ -20,7 +27,7 @@
 
             A inglorious defeat. Do better, Helldiver.
 
-        -   ## 31st day of the 142nd Galatic War
+        - ## 31st day of the 142nd Galatic War
 
             ✅ We have `defeated` the Bugs, with `2` helldivers culling the remanants.
             🚨 We are `at war with` the Cyborgs, with `142` brave helldivers fighting for the glorious democracy.

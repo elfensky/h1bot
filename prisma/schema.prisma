@@ -15,7 +15,8 @@ model Event {
     id String @id @default(uuid(7))
     event_id Int @unique
     message_id String @unique
-    last_updated DateTime
+    message_created DateTime
+    message_updated DateTime
     active Boolean @default(true)
 }
 
@@ -23,7 +24,8 @@ model Post {
     id String @id @default(uuid(7))
     start_time Int
     message_id String @unique
-    last_updated DateTime
+    message_created DateTime
+    message_updated DateTime
     active Boolean @default(true)
 }
 

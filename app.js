@@ -19,7 +19,8 @@ const log = pino({
         target: 'pino-pretty',
     },
 });
-log.info(chalk.white('APP - initializing...'));
+log.info(chalk.cyan('app.js ') + chalk.white('- initializing...'));
+
 const token = process.env.TOKEN; // const { token } = require('./config.json');
 const guildId = process.env.GUILD_ID;
 const channelId = process.env.CHANNEL_ID;
@@ -85,19 +86,43 @@ client.on(Events.InteractionCreate, async (interaction) => {
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, (readyClient) => {
-    runMigrations();
+    // runMigrations();
 
     const guild = client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(channelId);
 
     log.info(
-        chalk.white('APP - logged in as ') + chalk.yellow(readyClient.user.tag)
+        chalk.cyan('app.js ') +
+            chalk.white('- logged in as ') +
+            chalk.yellow(readyClient.user.tag)
+    );
+
+    // (await updateEvent(channel));
+    updateEvent(channel).then((info) =>
+        log.info(
+            chalk.cyan(info.action) +
+                chalk.white(' - ') +
+                chalk.blue(
+                    (performance.now() - info.start).toFixed(3) + ' ms'
+                ) +
+                chalk.white(info.message) +
+                chalk.yellow(info.variable)
+        )
     );
 
     const eventUpdate = new CronJob(
         '* * * * *',
         async () => {
-            const status = await updateEvent(channel);
+            const info = await updateEvent(channel);
+            log.info(
+                chalk.cyan(info.action) +
+                    chalk.white(' - ') +
+                    chalk.blue(
+                        (performance.now() - info.start).toFixed(3) + ' ms'
+                    ) +
+                    chalk.white(info.message) +
+                    chalk.yellow(info.variable)
+            );
         },
         () => {
             log.info(chalk.white('UPDATE - defence event update success.'));

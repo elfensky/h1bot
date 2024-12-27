@@ -1,16 +1,34 @@
-// Import with `import * as Sentry from "@sentry/node"` if you are using ESM
+const dotenv = require('dotenv');
 const Sentry = require('@sentry/node');
 const { nodeProfilingIntegration } = require('@sentry/profiling-node');
 
+dotenv.config();
+
+if (!process.env.SENTRY_DSN) {
+    throw new Error('SENTRY_DSN is not set');
+}
+
+const release = 'helldivers1bot@' + process.env.npm_package_version;
+const environment = process.env.NODE_ENV || 'development';
+
 Sentry.init({
-    dsn: 'https://394e3fdeab03c62753cfae9318e12d4c@o4508531381895168.ingest.de.sentry.io/4508535082909776',
+    dsn: process.env.SENTRY_DSN,
     integrations: [nodeProfilingIntegration()],
-    // Tracing
-    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    release: release,
+    environment: environment,
+    // Add Tracing by setting tracesSampleRate
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+    // Set sampling rate for profiling
+    // This is relative to tracesSampleRate
+    profilesSampleRate: 1.0,
 });
+
+console.log('[Sentry] initializing sentry for ' + release);
+
 // Manually call startProfiler and stopProfiler
 // to profile the code in between
-Sentry.profiler.startProfiler();
+// Sentry.profiler.startProfiler();
 
 // // Starts a transaction that will also be profiled
 // Sentry.startSpan(

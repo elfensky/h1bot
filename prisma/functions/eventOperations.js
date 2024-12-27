@@ -9,59 +9,24 @@ const log = pino({
     },
 });
 
-async function db_SaveEvent(eventId, messageId) {
+async function db_getEvent() {
     const start = performance.now();
     try {
-        const now = new Date();
-
-        // Ensure that the timestamp exists in the Timestamp table
-        const newEvent = await prisma.event.create({
-            data: {
-                event_id: eventId,
-                message_id: messageId,
-                last_updated: now,
-                finished: false,
+        const event = await prisma.event.findFirst({
+            orderBy: {
+                message_updated: 'desc',
             },
         });
 
         log.info(
-            chalk.white('DB - ran db_SaveEvent(') +
-                chalk.yellow(`${eventId}, ${messageId}`) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
-
-        return newEvent;
-    } catch (error) {
-        log.error(chalk.red('db_SaveEvent() crashed: \n') + error.message);
-        throw error;
-    }
-}
-
-async function db_updateEvent(id, active) {
-    const start = performance.now();
-
-    try {
-        const now = new Date();
-
-        const event = await prisma.event.update({
-            where: { event_id: id },
-            data: {
-                last_updated: now,
-                active: active,
-            },
-        });
-
-        log.info(
-            chalk.white('DB - ran updateEvent(') +
-                chalk.yellow(id) +
-                chalk.white(') in ') +
+            chalk.cyan('prisma') +
+                chalk.white(' - ran db_getEvent() in ') +
                 chalk.blue((performance.now() - start).toFixed(3) + ' ms')
         );
 
         return event;
     } catch (error) {
-        log.error(chalk.red('db_updateEvent() crashed: \n') + error.message);
+        log.error(chalk.red('db_getEvent() crashed: \n') + error.message);
         throw error;
     }
 }
@@ -74,7 +39,8 @@ async function db_getEventById(id) {
         });
 
         log.info(
-            chalk.white('DB - ran getEventById(') +
+            chalk.cyan('prisma') +
+                chalk.white(' - ran db_getEventById(') +
                 chalk.yellow(id) +
                 chalk.white(') in ') +
                 chalk.blue((performance.now() - start).toFixed(3) + ' ms')
@@ -82,13 +48,73 @@ async function db_getEventById(id) {
 
         return event;
     } catch (error) {
-        log.error(chalk.red('getEventById() crashed: \n') + error.message);
+        log.error(chalk.red('db_getEventById() crashed: \n') + error.message);
+        throw error;
+    }
+}
+
+async function db_SaveEvent(eventId, messageId) {
+    const start = performance.now();
+    try {
+        const now = new Date();
+
+        // Ensure that the timestamp exists in the Timestamp table
+        const event = await prisma.event.create({
+            data: {
+                event_id: eventId,
+                message_id: messageId,
+                message_created: now,
+                message_updated: now,
+                active: true, // default to active, because it's a new event
+            },
+        });
+
+        log.info(
+            chalk.cyan('prisma') +
+                chalk.white(' - ran db_SaveEvent(') +
+                chalk.yellow(`${eventId}, ${messageId}`) +
+                chalk.white(') in ') +
+                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        );
+
+        return event;
+    } catch (error) {
+        log.error(chalk.red('db_SaveEvent() crashed: \n') + error.message);
+        throw error;
+    }
+}
+
+async function db_updateEvent(id, status) {
+    const start = performance.now();
+    try {
+        const now = new Date();
+
+        const event = await prisma.event.update({
+            where: { event_id: id },
+            data: {
+                message_updated: now,
+                active: status,
+            },
+        });
+
+        log.info(
+            chalk.cyan('prisma') +
+                chalk.white(' - ran db_updateEvent(') +
+                chalk.yellow(id) +
+                chalk.white(') in ') +
+                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        );
+
+        return event;
+    } catch (error) {
+        log.error(chalk.red('db_updateEvent() crashed: \n') + error.message);
         throw error;
     }
 }
 
 module.exports = {
+    db_getEvent,
+    db_getEventById,
     db_SaveEvent,
     db_updateEvent,
-    db_getEventById,
 };

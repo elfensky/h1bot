@@ -3,6 +3,7 @@ const https = require('https');
 const FormData = require('form-data');
 
 async function getEvent() {
+    // const url = 'http://127.0.0.1:3000/v1/event';
     const url = 'https://api.helldivers.bot/v1/event'; // The API URL you want to ping
 
     try {
