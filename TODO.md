@@ -2,7 +2,7 @@
 
 -   ✅ finish and publish my own api cache
 -   ✅ update bot to use it
--   ✅ make sure it updates an existing message instead of spamming chat
+-   make sure it updates an existing message instead of spamming chat
 
     -   2 separate messages each day:
     -   one for defense and one for campaign info

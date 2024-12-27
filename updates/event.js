@@ -1,15 +1,16 @@
 const { performance } = require('perf_hooks');
-const getEvent = require('../api/getEvent');
 const dotenv = require('dotenv');
 const chalk = require('chalk');
 const pino = require('pino');
+//api
+const getEvent = require('../api/getEvent');
 //database
-const db_getEventById = require('../prisma/functions/getEventById');
-const db_SaveEvent = require('../prisma/functions/saveEvent');
-// const saveEventMessageID = require('../prisma/functions/saveEventMessageID');
-// const updateExistingEvent = require('../prisma/functions/updateExistingEvent');
-// const postNewEvent = require('../prisma/functions/postNewEvent');
-
+const {
+    db_getEventById,
+    db_updateEvent,
+    db_SaveEvent,
+} = require('../prisma/functions/eventOperations');
+// enums
 const enemies = require('../enums/enemies');
 const map = require('../enums/map');
 
@@ -25,10 +26,13 @@ async function updateEvent(channel) {
     const start = performance.now();
 
     const data = await getEvent().then((data) => data.data);
+
     const content = formatMessage(data); // create message content
+
     log.info(
         'event.js - fetched new event data ' + chalk.yellow(data.event_id)
     );
+
     let event = await db_getEventById(data.event_id); // has event been posted already?
 
     if (!event) {
@@ -40,13 +44,24 @@ async function updateEvent(channel) {
                 chalk.yellow(event.message_id)
         );
     } else {
-        const message = await channel.messages.fetch(event.message_id); // fetch message from discord
-        const update = await message.edit(content);
-        // console.log(update);
-        log.info(
-            'event.js - updated message with message_id ' +
-                chalk.yellow(event.message_id)
-        );
+        // update existing event
+        if (event.active === false) {
+            log.info('event.js - event already posted, not updating');
+        } else {
+            const message = await channel.messages.fetch(event.message_id); // fetch message from discord
+            const update = await message.edit(content);
+
+            if (data.status === 'active') {
+                event = await db_updateEvent(data.event_id, true);
+            } else {
+                event = await db_updateEvent(data.event_id, false);
+            }
+
+            log.info(
+                'event.js - updated message with message_id ' +
+                    chalk.yellow(event.message_id)
+            );
+        }
     }
 
     log.info(
@@ -72,15 +87,47 @@ function formatMessage(data) {
     const progress = Math.floor((data.points / data.points_max) * 100);
     const bar = generateProgressBar(progress);
 
-    const message = `
-**A CAPITAL CITY IS UNDER ATTACK**
+    if (data.status === 'active') {
+        const message = `
+**🚨 A CAPITAL CITY IS UNDER ATTACK**
 **${enemies[data.enemy]}** are attacking **${map[data.enemy][data.region]}** 
-Progress: ${bar}
-Points: ${data.points}/${data.points_max}
-Time: ${humanRemaining} remaining\n
-Last updated at ${humanTime} - GMT+0 \n
+Progress: \`${bar}\`
+Points: \`${data.points}/${data.points_max}\`
+Time: \`${humanRemaining}\` remaining
+
+Last updated at \`${humanTime} UTC+0\` \n
 `;
-    return message;
+        return message;
+    }
+
+    if (data.status === 'failure') {
+        const message = `
+**${enemies[data.enemy]}** have defeated **${map[data.enemy][data.region]}** 
+**💀 SHAMEFUL DEFEAT**
+**Our glorious democracy** has been defeated in the **${
+            map[data.enemy][data.region]
+        }**
+Progress: ${bar}
+Points: \`${data.points}/${data.points_max}\`
+
+Last updated at \`${humanTime} UTC+0\` \n
+`;
+        return message;
+    }
+
+    if (data.status === 'success') {
+        const message = `
+**✅ GLORIOUS VICTORY**
+**Helldivers** have successfully defended the **${
+            map[data.enemy][data.region]
+        }**
+Progress: \`${bar}\`
+Points: \`${data.points}/${data.points_max}\`
+
+Last updated at \`${humanTime} UTC+0\` \n
+`;
+        return message;
+    }
 }
 
 function millisecondsToTime(ms) {
@@ -113,7 +160,7 @@ function generateProgressBar(percentage) {
         '▰'.repeat(filledBlocks) + '▱'.repeat(totalBlocks - filledBlocks);
 
     // Return the progress bar with the percentage
-    return `\`${progressBar}\` ${percentage}%`;
+    return `${progressBar} ${percentage}%`;
 }
 
 module.exports = updateEvent;

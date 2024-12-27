@@ -16,7 +16,7 @@ model Event {
     event_id Int @unique
     message_id String @unique
     last_updated DateTime
-    finished Boolean @default(false)
+    active Boolean @default(true)
 }
 
 model Post {
@@ -24,7 +24,7 @@ model Post {
     start_time Int
     message_id String @unique
     last_updated DateTime
-    finished Boolean @default(false)
+    active Boolean @default(true)
 }
 
 // update model schema by running:
