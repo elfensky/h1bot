@@ -11,11 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   added RELEASE.md to use for the automatic release process
+-   add dependabot.yml for automatic dependabot pull requests
 
 ### Changed
 
 -   updated CHANGELOG.md with the history of the project so far.
 -   fix package.json versioning to match the changelog
+-
+
+### Security
+
+-   bumped docker/checkout from 3 to 4 - by @dependabot
+-   bumped docker/login-action from 2 to 3 - by @dependabot
+-   bumped docker/setup-buildx-action from 2 to 3 - by @dependabot
+-   bumped docker/build-push-action from 4 to 6 - by @dependabot
+-   bumped pino from 7.11.0 to 9.6.0 - by @dependabot
 
 ## [0.2.2] - 2024-12-28
 
