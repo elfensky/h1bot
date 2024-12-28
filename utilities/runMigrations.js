@@ -20,6 +20,7 @@ async function runMigrations() {
         const cleanedStdout = stdout.replace(/(\r?\n){3,}/g, '\n');
         log.info('\n' + cleanedStdout);
         log.info('DATABASE - finished migrations');
+        return true;
     } catch (error) {
         log.error('DATABASE - failed migrations \n' + error);
         throw error;

@@ -11,7 +11,16 @@ generator client {
   binaryTargets = ["native", "darwin-arm64", "linux-arm64-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
-model Event {
+model Defend {
+    id String @id @default(uuid(7))
+    event_id Int @unique
+    message_id String @unique
+    message_created DateTime
+    message_updated DateTime
+    active Boolean @default(true)
+}
+
+model Attack {
     id String @id @default(uuid(7))
     event_id Int @unique
     message_id String @unique

@@ -1,48 +1,51 @@
 const map = {
-    helldivers: {
-        0: 'Super Earth', //Sol System
-    },
     0: {
         // Bugs
-        0: 'Wise Region',
-        1: 'Kruger System',
-        2: 'Ross System	',
-        3: 'Struve Region',
-        4: 'Xi Tauri Region',
-        5: 'Cancri System',
-        6: 'Higgs Region',
-        7: 'Hawking Region',
-        8: 'Rigel System',
-        9: 'Aurigae Region',
-        10: 'Kepler Prime', //Kepler System, Bugs Homeworld
+        0: 'ERROR, contact <@125197915177091072>',
+        1: 'Super Earth',
+        2: 'Wise Region',
+        3: 'Kruger System',
+        4: 'Ross System	',
+        5: 'Struve Region',
+        6: 'Xi Tauri Region',
+        7: 'Cancri System',
+        8: 'Higgs Region',
+        9: 'Hawking Region',
+        10: 'Rigel System',
+        11: 'Aurigae Region',
+        12: 'Kepler Prime', //Kepler System, Bugs Homeworld
     },
     1: {
         // Cyborgs
-        0: 'Sirius Region',
-        1: 'Polaris Region',
-        2: 'Pictor Sector',
-        3: 'Sagan Region',
-        4: 'Horolium System',
-        5: 'Gellert Region',
-        6: 'Lacaille Region',
-        7: 'Indi System',
-        8: 'Ceti System',
-        9: 'Cygni Region',
-        10: 'Cyberstan', //Cyberstan Region
+        0: 'ERROR, contact <@125197915177091072>',
+        1: 'Super Earth',
+        2: 'Sirius Region',
+        3: 'Polaris Region',
+        4: 'Pictor Sector',
+        5: 'Sagan Region',
+        6: 'Horolium System',
+        7: 'Gellert Region',
+        8: 'Lacaille Region',
+        9: 'Indi System',
+        10: 'Ceti System',
+        11: 'Cygni Region',
+        12: 'Cyberstan', //Cyberstan Region
     },
     2: {
         // The Illuminate
-        0: 'Unknown Region',
-        1: 'Centaury Region',
-        2: 'Procyon Region',
-        3: 'Castor System',
-        4: 'Orionis Region',
-        5: 'Prometheus System',
-        6: 'Cassiopaiae Region',
-        7: 'Ursa Region',
-        8: 'Canes Region',
-        9: 'Arcturus Region',
-        10: "Squ'bai Shrine", //Squ'bai System
+        0: 'ERROR, contact <@125197915177091072>',
+        1: 'Super Earth',
+        2: 'Unknown Region',
+        3: 'Centaury Region',
+        4: 'Procyon Region',
+        5: 'Castor System',
+        6: 'Orionis Region',
+        7: 'Prometheus System',
+        8: 'Cassiopaiae Region',
+        9: 'Ursa Region',
+        10: 'Canes Region',
+        11: 'Arcturus Region',
+        12: "Squ'bai Shrine", //Squ'bai System
     },
 };
 

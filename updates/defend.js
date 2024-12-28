@@ -10,9 +10,9 @@ const {
     db_getEventById,
     db_updateEvent,
     db_SaveEvent,
-} = require('../prisma/functions/eventOperations');
+} = require('../prisma/functions/defendOperations');
 // components
-const eventMessage = require('../utilities/eventMessage');
+const { defendMessage } = require('../utilities/generateMessage');
 
 //config
 dotenv.config();
@@ -22,7 +22,7 @@ const log = pino({
     },
 });
 
-async function updateEvent(channel) {
+async function updateDefend(channel) {
     const start = performance.now();
 
     let event = await db_getEvent(); //database - get the most recent event
@@ -32,7 +32,7 @@ async function updateEvent(channel) {
     if (!event) {
         //if no event in database this is a fresh setup.
         //start discord.js
-        const content = eventMessage(api); // create message content
+        const content = defendMessage(api); // create message content
         const message = await channel.send(content); // post message to discord (returns message object)
         //start prisma
         event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
@@ -45,12 +45,12 @@ async function updateEvent(channel) {
         };
     }
 
-    if (event.active === true) {
+    if (event.active === true && event.event_id === api.event_id) {
         //if existing event is currently in-progress, update the discord message and database record
         //start prisma
         event = await db_updateEvent(event.event_id, status); // update the database record
         //start discord.js
-        const content = eventMessage(api, event); // create message content
+        const content = defendMessage(api, event); // create message content
         const message = await channel.messages.fetch(event.message_id); // fetch message from discord by id
         const update = await message.edit(content); // update the message with new content
 
@@ -77,7 +77,7 @@ async function updateEvent(channel) {
     // if otherwise, it means a new event has started, and we must
     // 1. post a new message to discord (generate message.id)
     // 2. create a new event in the database
-    const content = eventMessage(api); // create message content
+    const content = defendMessage(api); // create message content
     const message = await channel.send(content); // post message to discord (returns message object)
     event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
     return {
@@ -88,4 +88,4 @@ async function updateEvent(channel) {
     };
 }
 
-module.exports = updateEvent;
+module.exports = updateDefend;

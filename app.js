@@ -11,7 +11,8 @@ const runMigrations = require('./utilities/runMigrations');
 // discord.js components
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 // CRONS
-const updateEvent = require('./updates/event');
+const updateDefend = require('./updates/defend');
+// const updateAttack = require('./updates/attack');
 
 dotenv.config(); // Load environment variables from .env file
 const log = pino({
@@ -86,8 +87,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, (readyClient) => {
-    // runMigrations();
-
     const guild = client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(channelId);
 
@@ -97,39 +96,48 @@ client.once(Events.ClientReady, (readyClient) => {
             chalk.yellow(readyClient.user.tag)
     );
 
-    // (await updateEvent(channel));
-    updateEvent(channel).then((info) =>
-        log.info(
-            chalk.cyan(info.action) +
-                chalk.white(' - ') +
-                chalk.blue(
-                    (performance.now() - info.start).toFixed(3) + ' ms'
-                ) +
-                chalk.white(info.message) +
-                chalk.yellow(info.variable)
-        )
-    );
+    // (await updateDefend(channel));
+    // updateDefend(channel).then((info) =>
+    //     log.info(
+    //         chalk.cyan(info.action) +
+    //             chalk.white(' - ') +
+    //             chalk.blue(
+    //                 (performance.now() - info.start).toFixed(3) + ' ms'
+    //             ) +
+    //             chalk.white(info.message) +
+    //             chalk.yellow(info.variable)
+    //     )
+    // );
 
-    const eventUpdate = new CronJob(
-        '* * * * *',
+    runMigrations().then(() => {
         async () => {
-            const info = await updateEvent(channel);
-            log.info(
-                chalk.cyan(info.action) +
-                    chalk.white(' - ') +
-                    chalk.blue(
-                        (performance.now() - info.start).toFixed(3) + ' ms'
-                    ) +
-                    chalk.white(info.message) +
-                    chalk.yellow(info.variable)
-            );
-        },
-        () => {
-            log.info(chalk.white('UPDATE - defence event update success.'));
-        }, // No onComplete function
-        true, // Start the job right now)
-        'Europe/Brussels' // Time zone);
-    );
+            log.info(chalk.cyan('crons ' + chalk.white('- starting...')));
+        };
+
+        const defendUpdateCron = new CronJob(
+            '*/30 * * * * *',
+            async () => {
+                log.info(
+                    chalk.cyan('crons ') +
+                        chalk.white('- starting defendUpdateCron')
+                );
+
+                const info = await updateDefend(channel).then();
+
+                log.info(
+                    chalk.cyan(info.action) +
+                        chalk.white(' - ') +
+                        chalk.blue(
+                            (performance.now() - info.start).toFixed(3) + ' ms'
+                        ) +
+                        chalk.white(info.message) +
+                        chalk.yellow(info.variable)
+                );
+            },
+            true, // Start the job right now)
+            'Europe/Brussels' // Time zone);
+        );
+    });
 });
 
 // Log in to Discord with your client's token

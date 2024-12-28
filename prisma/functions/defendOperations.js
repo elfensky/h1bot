@@ -12,7 +12,7 @@ const log = pino({
 async function db_getEvent() {
     const start = performance.now();
     try {
-        const event = await prisma.event.findFirst({
+        const event = await prisma.defend.findFirst({
             orderBy: {
                 message_updated: 'desc',
             },
@@ -34,7 +34,7 @@ async function db_getEvent() {
 async function db_getEventById(id) {
     const start = performance.now();
     try {
-        const event = await prisma.event.findUnique({
+        const event = await prisma.defend.findUnique({
             where: { event_id: id },
         });
 
@@ -59,7 +59,7 @@ async function db_SaveEvent(eventId, messageId) {
         const now = new Date();
 
         // Ensure that the timestamp exists in the Timestamp table
-        const event = await prisma.event.create({
+        const event = await prisma.defend.create({
             data: {
                 event_id: eventId,
                 message_id: messageId,
@@ -89,7 +89,7 @@ async function db_updateEvent(id, status) {
     try {
         const now = new Date();
 
-        const event = await prisma.event.update({
+        const event = await prisma.defend.update({
             where: { event_id: id },
             data: {
                 message_updated: now,

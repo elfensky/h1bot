@@ -32,6 +32,7 @@ docker build -t elfensky/h1bot:latest .
 #### Build production
 
 docker buildx build --platform linux/amd64,linux/arm64 -t elfensky/h1bot:latest . --push
+docker buildx build --platform linux/amd64 -t elfensky/h1bot:latest . --push
 
 #### Run in production
 
