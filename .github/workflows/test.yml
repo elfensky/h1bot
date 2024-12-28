@@ -1,0 +1,17 @@
+name: Build Dev Image
+on:
+    workflow_dispatch: # allows requesting workflow manually from the website
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: CHANGELOG.md
+                  body_path: CHANGELOG.md
+                  token: ${{ secrets.ACCESS_TOKEN }}
