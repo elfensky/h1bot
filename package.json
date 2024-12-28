@@ -1,6 +1,6 @@
 {
     "name": "h1bot",
-    "version": "1.0.2",
+    "version": "0.2.3",
     "description": "discord bot to notify helldivers about planetary defense events",
     "keywords": [
         "discord",
