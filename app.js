@@ -12,8 +12,9 @@ const runMigrations = require('./utilities/runMigrations');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 // CRONS
 const updateDefend = require('./updates/defend');
-// const updateAttack = require('./updates/attack');
+const updateAttack = require('./updates/attack');
 
+// #region CONFIG
 dotenv.config(); // Load environment variables from .env file
 const log = pino({
     transport: {
@@ -25,15 +26,17 @@ log.info(chalk.cyan('app.js ') + chalk.white('- initializing...'));
 const token = process.env.TOKEN; // const { token } = require('./config.json');
 const guildId = process.env.GUILD_ID;
 const channelId = process.env.CHANNEL_ID;
+// #endregion
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// add /commands folder to the client
+// #region COMMANDS
+// setup config for commands
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
-
+//add /commands folder to the client
 for (const folder of commandFolders) {
     const commandsPath = path.join(foldersPath, folder);
     const commandFiles = fs
@@ -52,7 +55,7 @@ for (const folder of commandFolders) {
         }
     }
 }
-
+// implement command handler
 client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
@@ -82,6 +85,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
     }
 });
+// #endregion
 
 // When the client is ready, run this code (only once).
 // The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
@@ -96,18 +100,17 @@ client.once(Events.ClientReady, (readyClient) => {
             chalk.yellow(readyClient.user.tag)
     );
 
-    // (await updateDefend(channel));
-    // updateDefend(channel).then((info) =>
-    //     log.info(
-    //         chalk.cyan(info.action) +
-    //             chalk.white(' - ') +
-    //             chalk.blue(
-    //                 (performance.now() - info.start).toFixed(3) + ' ms'
-    //             ) +
-    //             chalk.white(info.message) +
-    //             chalk.yellow(info.variable)
-    //     )
-    // );
+    updateAttack(channel).then((info) =>
+        log.info(
+            chalk.cyan(info.action) +
+                chalk.white(' - ') +
+                chalk.blue(
+                    (performance.now() - info.start).toFixed(3) + ' ms'
+                ) +
+                chalk.white(info.message) +
+                chalk.yellow(info.variable)
+        )
+    );
 
     runMigrations().then(() => {
         async () => {
@@ -122,7 +125,7 @@ client.once(Events.ClientReady, (readyClient) => {
                         chalk.white('- starting defendUpdateCron')
                 );
 
-                const info = await updateDefend(channel).then();
+                const info = await updateDefend(channel);
 
                 log.info(
                     chalk.cyan(info.action) +

@@ -35,8 +35,8 @@ const map = {
         // The Illuminate
         // : 'ERROR, contact <@125197915177091072>',
         0: 'Super Earth',
-        1: 'Unknown Region',
-        2: 'Centaury Region',
+        1: 'Centaury Region',
+        2: 'Barnard Region',
         3: 'Procyon Region',
         4: 'Castor System',
         5: 'Orionis Region',

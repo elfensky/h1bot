@@ -2,9 +2,14 @@ const axios = require('axios');
 const https = require('https');
 const FormData = require('form-data');
 
-async function getOfficialCampaignStatus() {
+async function getCampaignStatus() {
     // The API URL you want to ping
-    const url = 'https://api.helldiversgame.com/1.0/';
+    const host =
+        process.env.NODE_ENV === 'production'
+            ? 'https://api.helldivers.bot'
+            : 'http://127.0.0.1:3000';
+    const url = `${host}/rebroadcast`;
+    //formdata
     const form = new FormData();
     form.append('action', 'get_campaign_status');
 
@@ -31,4 +36,4 @@ async function getOfficialCampaignStatus() {
     }
 }
 
-module.exports = getOfficialCampaignStatus;
+module.exports = getCampaignStatus;
