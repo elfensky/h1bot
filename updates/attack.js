@@ -38,7 +38,7 @@ async function updateAttack(channel) {
         event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
 
         return {
-            action: 'event.js',
+            action: 'attack.js',
             message: ' - created initial event with with message_id ',
             variable: event.message_id,
             start,
@@ -55,7 +55,7 @@ async function updateAttack(channel) {
         const update = await message.edit(content); // update the message with new content
 
         return {
-            action: 'event.js',
+            action: 'attack.js',
             message: ' - updated eventmessage with message_id ',
             variable: event.message_id,
             start,
@@ -74,7 +74,7 @@ async function updateAttack(channel) {
         const message = await channel.send(content); // post message to discord (returns message object)
         event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
         return {
-            action: 'event.js',
+            action: 'attack.js',
             message:
                 ' - updated old event and created new event with message_id ',
             variable: event.message_id,
@@ -83,7 +83,7 @@ async function updateAttack(channel) {
     }
 
     return {
-        action: 'event.js',
+        action: 'attack.js',
         message: ' - event has concluded and the last update was sent on ',
         variable: event.message_updated.toLocaleString('de-GB'),
         start,

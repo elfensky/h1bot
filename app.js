@@ -100,17 +100,17 @@ client.once(Events.ClientReady, (readyClient) => {
             chalk.yellow(readyClient.user.tag)
     );
 
-    updateAttack(channel).then((info) =>
-        log.info(
-            chalk.cyan(info.action) +
-                chalk.white(' - ') +
-                chalk.blue(
-                    (performance.now() - info.start).toFixed(3) + ' ms'
-                ) +
-                chalk.white(info.message) +
-                chalk.yellow(info.variable)
-        )
-    );
+    // updateAttack(channel).then((info) =>
+    //     log.info(
+    //         chalk.cyan(info.action) +
+    //             chalk.white(' - ') +
+    //             chalk.blue(
+    //                 (performance.now() - info.start).toFixed(3) + ' ms'
+    //             ) +
+    //             chalk.white(info.message) +
+    //             chalk.yellow(info.variable)
+    //     )
+    // );
 
     runMigrations().then(() => {
         async () => {
@@ -118,7 +118,7 @@ client.once(Events.ClientReady, (readyClient) => {
         };
 
         const defendUpdateCron = new CronJob(
-            '*/30 * * * * *',
+            '5/15 * * * * *',
             async () => {
                 log.info(
                     chalk.cyan('crons ') +
@@ -126,6 +126,30 @@ client.once(Events.ClientReady, (readyClient) => {
                 );
 
                 const info = await updateDefend(channel);
+
+                log.info(
+                    chalk.cyan(info.action) +
+                        chalk.white(' - ') +
+                        chalk.blue(
+                            (performance.now() - info.start).toFixed(3) + ' ms'
+                        ) +
+                        chalk.white(info.message) +
+                        chalk.yellow(info.variable)
+                );
+            },
+            true, // Start the job right now)
+            'Europe/Brussels' // Time zone);
+        );
+
+        const attackUpdateCron = new CronJob(
+            '10/15 * * * * *',
+            async () => {
+                log.info(
+                    chalk.cyan('crons ') +
+                        chalk.white('- starting attackUpdateCron')
+                );
+
+                const info = await updateAttack(channel);
 
                 log.info(
                     chalk.cyan(info.action) +

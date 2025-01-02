@@ -118,8 +118,6 @@ Points: \`${data.points}/${data.points_max}\`
 
 // #region ATTACK MESSAGE
 function attackMessage(data, event) {
-    console.log('data', data);
-    console.log('event', event);
     //setup time
     const now = new Date();
     const message_created_human = new Date(

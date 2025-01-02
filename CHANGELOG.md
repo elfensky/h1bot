@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-01-02
+
 ### Added
 
+-   attack event announcements
 -   added RELEASE.md to use for the automatic release process
 -   add dependabot.yml for automatic dependabot pull requests
 
@@ -17,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   updated CHANGELOG.md with the history of the project so far.
 -   fix package.json versioning to match the changelog
--
+-   api urls to match new api structure
 
 ### Security
 
