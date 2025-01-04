@@ -54,27 +54,7 @@ async function db_getEventById(id) {
     }
 }
 
-async function db_getAllActive() {
-    const start = performance.now();
-    try {
-        const events = await prisma.defend.findMany({
-            where: { active: true },
-        });
-
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_getAllActive() in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
-
-        return events;
-    } catch (error) {
-        log.error(chalk.red('db_getAllActive() crashed: \n') + error.message);
-        throw error;
-    }
-}
-
-async function db_SaveEvent(event_id, message_id) {
+async function db_SaveEvent(eventId, messageId) {
     const start = performance.now();
     try {
         const now = new Date();
@@ -82,19 +62,18 @@ async function db_SaveEvent(event_id, message_id) {
         // Ensure that the timestamp exists in the Timestamp table
         const event = await prisma.defend.create({
             data: {
-                event_id: event_id,
-                message_id: message_id,
+                event_id: eventId,
+                message_id: messageId,
                 message_created: now,
                 message_updated: now,
-                // status: 'active', // default to active, because it's a new event
-                // active: true, // default to active, because it's a new event
+                status: 'active',
             },
         });
 
         log.info(
             chalk.cyan('defendOperations.js') +
                 chalk.white(' - ran db_SaveEvent(') +
-                chalk.yellow(`${event_id}, ${message_id}`) +
+                chalk.yellow(`${eventId}, ${messageId}`) +
                 chalk.white(') in ') +
                 chalk.blue((performance.now() - start).toFixed(3) + ' ms')
         );
@@ -106,24 +85,23 @@ async function db_SaveEvent(event_id, message_id) {
     }
 }
 
-async function db_updateEvent(api) {
+async function db_updateEvent(event_id, status) {
     const start = performance.now();
     try {
         const now = new Date();
 
         const event = await prisma.defend.update({
-            where: { event_id: api.event_id },
+            where: { event_id: event_id },
             data: {
                 message_updated: now,
-                status: api.status,
-                active: api.status === 'active' ? true : false,
+                status: status,
             },
         });
 
         log.info(
             chalk.cyan('defendOperations.js') +
                 chalk.white(' - ran db_updateEvent(') +
-                chalk.yellow(event.event_id) +
+                chalk.yellow(event_id) +
                 chalk.white(') in ') +
                 chalk.blue((performance.now() - start).toFixed(3) + ' ms')
         );
@@ -135,68 +113,9 @@ async function db_updateEvent(api) {
     }
 }
 
-async function db_setInactive(event_id) {
-    const start = performance.now();
-
-    try {
-        const event = await prisma.defend.update({
-            where: { event_id: event_id },
-            data: {
-                message_updated: new Date(),
-                status: 'deleted',
-                active: false,
-            },
-        });
-
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_setInactive(') +
-                chalk.yellow(event_id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
-
-        return event;
-    } catch (error) {
-        log.error(chalk.red('db_setInactive() crashed: \n') + error.message);
-        throw error;
-    }
-}
-
-async function db_upsertEvent(event_id, data) {
-    const start = performance.now();
-    try {
-        const now = new Date();
-
-        const event = await prisma.defend.upsert({
-            where: { event_id: event_id },
-            data: {
-                message_updated: now,
-                status: data.status,
-                active: data.active,
-            },
-        });
-
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_upsertEvent(') +
-                chalk.yellow(event_id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
-
-        return event;
-    } catch (error) {
-        log.error(chalk.red('db_upsertEvent() crashed: \n') + error.message);
-        throw error;
-    }
-}
-
 module.exports = {
     db_getEvent,
     db_getEventById,
-    db_getAllActive,
     db_SaveEvent,
     db_updateEvent,
-    db_setInactive,
 };

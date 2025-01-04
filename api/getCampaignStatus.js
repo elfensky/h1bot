@@ -8,6 +8,7 @@ async function getCampaignStatus() {
         process.env.NODE_ENV === 'production'
             ? 'https://api.helldivers.bot'
             : 'http://127.0.0.1:3000';
+
     const url = `${host}/rebroadcast`;
     //formdata
     const form = new FormData();

@@ -1,8 +1,12 @@
+const chalk = require('chalk');
+
 const enemies = require('../enums/enemies');
 const worlds = require('../enums/homeworlds');
 const map = require('../enums/map');
 
-function millisecondsToTime(ms) {
+const environment = process.env.NODE_ENV || 'development';
+
+function util_milliseconds_to_human_time(ms) {
     // Calculate total seconds
     const totalSeconds = Math.floor(ms / 1000);
 
@@ -12,17 +16,23 @@ function millisecondsToTime(ms) {
     const seconds = totalSeconds % 60;
 
     // Format the time as HH:MM:SS
-    const formattedTime = `${hours.toString().padStart(2, '0')} Hours ${minutes
-        .toString()
-        .padStart(2, '0')} Minutes ${seconds
-        .toString()
-        .padStart(2, '0')} Seconds`;
+    // const hours = ``;
+    const msg1 = `\`${hours.toString().padStart(2, '0')} Hours\``;
+    const msg2 = `\`${minutes.toString().padStart(2, '0')} Minutes\``;
+    const msg3 = `\`${seconds.toString().padStart(2, '0')} Seconds\``;
 
-    return formattedTime;
+    return `${msg1} ${msg2} ${msg3}`;
 }
 
-function generateProgressBar(percentage) {
+function util_generate_progress_bar(percentage) {
     const totalBlocks = 12; // Total number of blocks in the progress bar
+
+    if (!typeof percentage === 'number') {
+        console.log('percentage must not a number');
+        throw new Error('percentage must be a number');
+        // return;
+    }
+
     const filledBlocks = Math.round((percentage / 100) * totalBlocks); // Calculate the number of filled blocks
 
     const full = '■'; //■ //✅ //▰
@@ -35,124 +45,175 @@ function generateProgressBar(percentage) {
     return `${progressBar} ${percentage}%`;
 }
 
-// #region DEFEND MESSAGE
-function defendMessage(data, event) {
+// #region DEFENCE TEXT SECTION GENERATORS
+function defence_title(event, chat) {
+    if (event.status === 'active') {
+        if (event.region !== 0) {
+            return `**:shield: <@&1322659004056338533> A CAPITAL CITY IS UNDER ATTACK!**`;
+        } else {
+            return `**:shield: <@&1322659004056338533> SUPER EARTH IS UNDER ATTACK!!!**`;
+        }
+    }
+
+    if (event.status === 'success') {
+        if (event.region !== 0) {
+            return `**:shield: <@&1322659004056338533> A CAPITAL CITY SECURES VICTORY!**`;
+        } else {
+            return `**:shield: <@&1322659004056338533> SUPER EARTH STANDS STRONG AGAINST THE ENEMY!!!**`;
+        }
+    }
+
+    if (event.status === 'failure') {
+        if (event.region !== 0) {
+            return `**:shield: <@&1322659004056338533> A CAPITAL CITY HAS FALLEN!**`;
+        } else {
+            return `**:shield: <@&1322659004056338533> HUMANITY HAS FALLEN!!!**`;
+        }
+    }
+}
+
+function defence_info(event, chat) {
+    if (event.status === 'active') {
+        return `> **${enemies[event.enemy]}** are attacking the **${
+            map[event.enemy][event.region]
+        }** `;
+    }
+
+    if (event.status === 'success') {
+        return `> Helldivers have **repelled** the **${
+            enemies[event.enemy]
+        }** in the **${map[event.enemy][event.region]}**`;
+    }
+
+    if (event.status === 'failure') {
+        return `> Helldivers have been **defeated** by **${
+            enemies[event.enemy]
+        }** in the **${map[event.enemy][event.region]}**`;
+    }
+}
+
+function defence_progress(event) {
+    const progress =
+        event.points <= event.points_max
+            ? Math.floor((event.points / event.points_max) * 100)
+            : 'n/a';
+    const bar =
+        typeof progress === 'number'
+            ? util_generate_progress_bar(progress)
+            : 'n/a';
+
+    return `> Progress \`${bar}\` \`${event.points}/${event.points_max}\``;
+}
+
+function defence_time_remaining(event, chat) {
     //setup time
     const now = new Date();
-    const message_created_human = new Date(
-        event ? event.message_created : Date.now()
-    ).toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-    const message_updated_human = new Date(
-        event ? event.message_updated : Date.now()
-    ).toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
-    const end = new Date(data.end_time * 1000).getTime();
+    const end = new Date(event.end_time * 1000).getTime();
     const timestamp = now.getTime();
     //calculate time remaining
     const remaining = end - timestamp;
-    const remaining_human = millisecondsToTime(remaining);
-    const progress = Math.floor((data.points / data.points_max) * 100);
-    const bar = generateProgressBar(progress);
+    const remaining_human = util_milliseconds_to_human_time(remaining);
 
-    if (data.status === 'active') {
-        const message = `
-<@&1322659004056338533>\n
-**:cityscape: A CAPITAL CITY IS UNDER ATTACK**
+    const ended = new Date(event.end_time * 1000).toLocaleString('en-US', {
+        timeZone: 'UTC',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 
-**${enemies[data.enemy]}** are attacking the **${
-            map[data.enemy][data.region]
-        }** 
-Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
-Time: \`${remaining_human}\` remaining
+    const message =
+        remaining >= 0
+            ? `> Deadline ${remaining_human} remaining`
+            : `> Defend Event has ended at \`${ended}\` UTC+0`;
 
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
+    return message;
+}
+
+function defence_debug(event, chat) {
+    const message_created = chat
+        ? `\`chat started on\` <t:${Math.floor(chat.message_created / 1000)}:F>`
+        : `\`chat started on\` <t:${Math.floor(Date.now() / 1000)}:F>`;
+
+    const message_updated = chat
+        ? `\`last updated on\` <t:${Math.floor(chat.message_updated / 1000)}:R>`
+        : `\`last updated on\` <t:${Math.floor(Date.now() / 1000)}:R>`;
+
+    const message_updated_human = new Date(
+        chat ? chat.message_updated : Date.now()
+    ).toLocaleTimeString('en-US', {
+        timeZone: 'UTC',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    const message = `\n${message_created}\n${message_updated} (\`${message_updated_human}\`)\n- \`event_id:\` \`${event.event_id}\``;
+    return message;
+}
+// #endregion
+
+// #region DEFEND MESSAGE
+function generate_defence_message(event, chat) {
+    try {
+        const message_title = defence_title(event, chat);
+        const message_info = defence_info(event, chat);
+        const message_progress = defence_progress(event);
+        const message_time_remaining = defence_time_remaining(event, chat);
+        const message_debug =
+            environment === 'development' ? defence_debug(event, chat) : '';
+
+        const message = `${message_title}
+                ${message_info}
+                ${message_progress}
+                ${message_time_remaining}
+                ${message_debug}
+                `;
         return message;
-    }
-
-    if (data.status === 'failure') {
-        const message = `
-<@&1322659004056338533>\n
-**💀 SHAMEFUL DEFEAT**
-
-**Our glorious democracy** has been defeated in the **${
-            map[data.enemy][data.region]
-        }** by **${enemies[data.enemy]}**
-Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
-
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
-        return message;
-    }
-
-    if (data.status === 'success') {
-        const message = `
-<@&1322659004056338533>\n
-**🎉 GLORIOUS VICTORY**
-
-**Helldivers** have successfully defended the **${
-            map[data.enemy][data.region]
-        }** against ${enemies[data.enemy]}
-Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
-
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
-        return message;
+    } catch (error) {
+        console.error('error', error);
     }
 }
 // #endregion
 
 // #region ATTACK MESSAGE
-function attackMessage(data, event) {
+function attackMessage(event, chat) {
     //setup time
     const now = new Date();
     const message_created_human = new Date(
-        event ? event.message_created : Date.now()
+        chat ? chat.message_created : Date.now()
     ).toLocaleTimeString('en-US', {
         timeZone: 'UTC',
         hour: '2-digit',
         minute: '2-digit',
     });
     const message_updated_human = new Date(
-        event ? event.message_updated : Date.now()
+        chat ? chat.message_updated : Date.now()
     ).toLocaleTimeString('en-US', {
         timeZone: 'UTC',
         hour: '2-digit',
         minute: '2-digit',
     });
 
-    const end = new Date(data.end_time * 1000).getTime();
+    const end = new Date(event.end_time * 1000).getTime();
     const timestamp = now.getTime();
     //calculate time remaining
     const remaining = end - timestamp;
-    const remaining_human = millisecondsToTime(remaining);
-    const progress = Math.floor((data.points / data.points_max) * 100);
-    const bar = generateProgressBar(progress);
+    const remaining_human = util_milliseconds_to_human_time(remaining);
+    const progress =
+        event.points <= event.points_max
+            ? Math.floor((event.points / event.points_max) * 100)
+            : 'NaN';
+    const bar = util_generate_progress_bar(progress);
 
-    if (data.status === 'active') {
+    if (event.status === 'active') {
         const message = `
 <@&1322659004056338533>\n
-**🌎 A PLANETARY ASSAULT HAS BEGUN**
+**🗡️🌎 A PLANETARY ASSAULT HAS BEGUN**
 
-**All forces must converge on ${worlds[data.enemy]}!**
+**All forces must converge on ${worlds[event.enemy]}!**
 
 Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
-Time: \`${remaining_human}\` remaining
+Points: \`${event.points}/${event.points_max}\`
+Time: ${remaining_human} remaining
 
 \`message created\` at \`${message_created_human} UTC+0\`
 \`message updated\` at \`${message_updated_human} UTC+0\` \n
@@ -160,16 +221,16 @@ Time: \`${remaining_human}\` remaining
         return message;
     }
 
-    if (data.status === 'fail') {
+    if (event.status === 'fail') {
         const message = `
 <@&1322659004056338533>\n
-**💀 SHAMEFUL DEFEAT**
+**🗡️💀 SHAMEFUL DEFEAT**
 
 **Our glorious democratic assault** on ${
-            worlds[data.enemy]
-        } has been thwarted by **${enemies[data.enemy]}**
+            worlds[event.enemy]
+        } has been thwarted by **${enemies[event.enemy]}**
 Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
+Points: \`${event.points}/${event.points_max}\`
 
 \`message created\` at \`${message_created_human} UTC+0\`
 \`message updated\` at \`${message_updated_human} UTC+0\` \n
@@ -177,16 +238,16 @@ Points: \`${data.points}/${data.points_max}\`
         return message;
     }
 
-    if (data.status === 'success') {
+    if (event.status === 'success') {
         const message = `
 <@&1322659004056338533>\n
-**🕊️ PACIFICATION COMPLETE**
+**🗡️🕊️ PACIFICATION COMPLETE**
 
-**Helldivers** have successfully defeated the ${enemies[data.enemy]} on ${
-            worlds[data.enemy]
+**Helldivers** have successfully defeated the ${enemies[event.enemy]} on ${
+            worlds[event.enemy]
         }
 Progress: \`${bar}\`
-Points: \`${data.points}/${data.points_max}\`
+Points: \`${event.points}/${event.points_max}\`
 
 \`message created\` at \`${message_created_human} UTC+0\`
 \`message updated\` at \`${message_updated_human} UTC+0\` \n
@@ -196,4 +257,4 @@ Points: \`${data.points}/${data.points_max}\`
 }
 // #endregion
 
-module.exports = { defendMessage, attackMessage };
+module.exports = { generate_defence_message, attackMessage };

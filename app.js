@@ -11,8 +11,8 @@ const runMigrations = require('./utilities/runMigrations');
 // discord.js components
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 // CRONS
-const updateDefend = require('./updates/defend');
-const updateAttack = require('./updates/attack');
+const { updateDefend, cleanupDefend } = require('./auto/defend');
+const updateAttack = require('./auto/attack');
 
 // #region CONFIG
 dotenv.config(); // Load environment variables from .env file
@@ -100,70 +100,60 @@ client.once(Events.ClientReady, (readyClient) => {
             chalk.yellow(readyClient.user.tag)
     );
 
-    // updateAttack(channel).then((info) =>
-    //     log.info(
-    //         chalk.cyan(info.action) +
-    //             chalk.white(' - ') +
-    //             chalk.blue(
-    //                 (performance.now() - info.start).toFixed(3) + ' ms'
-    //             ) +
-    //             chalk.white(info.message) +
-    //             chalk.yellow(info.variable)
-    //     )
-    // );
-
     runMigrations().then(() => {
         async () => {
             log.info(chalk.cyan('crons ' + chalk.white('- starting...')));
         };
 
         const defendUpdateCron = new CronJob(
-            '5/15 * * * * *',
+            '*/15 * * * * *', //every 15 seconds
             async () => {
                 log.info(
-                    chalk.cyan('crons ') +
-                        chalk.white('- starting defendUpdateCron')
+                    chalk.cyan('crons ') + chalk.white('- ran defendUpdateCron')
                 );
 
-                const info = await updateDefend(channel);
-
-                log.info(
-                    chalk.cyan(info.action) +
-                        chalk.white(' - ') +
-                        chalk.blue(
-                            (performance.now() - info.start).toFixed(3) + ' ms'
-                        ) +
-                        chalk.white(info.message) +
-                        chalk.yellow(info.variable)
-                );
+                await updateDefend(channel);
             },
             true, // Start the job right now)
             'Europe/Brussels' // Time zone);
         );
 
-        const attackUpdateCron = new CronJob(
-            '10/15 * * * * *',
+        const defendCleanupCron = new CronJob(
+            '30 * * * *', //once an hour, at 30 minutes of the hour
             async () => {
                 log.info(
                     chalk.cyan('crons ') +
-                        chalk.white('- starting attackUpdateCron')
+                        chalk.white('- ran defendCleanupCron')
                 );
 
-                const info = await updateAttack(channel);
-
-                log.info(
-                    chalk.cyan(info.action) +
-                        chalk.white(' - ') +
-                        chalk.blue(
-                            (performance.now() - info.start).toFixed(3) + ' ms'
-                        ) +
-                        chalk.white(info.message) +
-                        chalk.yellow(info.variable)
-                );
+                await cleanupDefend(channel);
             },
             true, // Start the job right now)
             'Europe/Brussels' // Time zone);
         );
+
+        // const attackUpdateCron = new CronJob(
+        //     '*/5 * * * * *',
+        //     async () => {
+        //         log.info(
+        //             chalk.cyan('crons ') + chalk.white('- attackUpdateCron')
+        //         );
+
+        //         const info = await updateAttack(channel);
+
+        //         log.info(
+        //             chalk.cyan(info.action) +
+        //                 chalk.white(' - ') +
+        //                 chalk.blue(
+        //                     (performance.now() - info.start).toFixed(3) + ' ms'
+        //                 ) +
+        //                 chalk.white(info.message) +
+        //                 chalk.yellow(info.variable)
+        //         );
+        //     },
+        //     true, // Start the job right now)
+        //     'Europe/Brussels' // Time zone);
+        // );
     });
 });
 

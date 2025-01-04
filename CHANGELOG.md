@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   command /history
+-   command /season [season]
+
+### Changed
+
+-   overhauled generateMessage.js to be more modular
+-   changed database structure to use status String instead of active Boolean
+
+### Fixed
+
+-   defendEvent update logic to prevent an abandoned event from happening.
+-   minor fixes to enums
+
+### Security
+
+-   bumped cron from 3.3.1 to 3.3.2 - by @dependabot
+
 ## [0.3.0] - 2025-01-02
 
 ### Added

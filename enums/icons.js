@@ -5,12 +5,12 @@ const icons = {
         2: '<:iconilluminate:1322324980716933242>',
     },
     status: {
-        'active': '<:iconactive:>',
-        'inactive': '<:iconinactive:>',
-        'fail': '<:iconfail:>',
-        'success': '<:iconsuccess:>',
-    }
+        active: '<:iconactive:>',
+        inactive: '<:iconinactive:>',
+        fail: '<:iconfail:>',
+        success: '<:iconsuccess:>',
+    },
     helldivers: {
         0: '<:iconsuperearth:>',
-    }
+    },
 };

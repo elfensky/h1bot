@@ -11,31 +11,34 @@ generator client {
   binaryTargets = ["native", "darwin-arm64", "linux-arm64-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
-model Defend {
+model defend {
     id String @id @default(uuid(7))
     event_id Int @unique
     message_id String @unique
     message_created DateTime
     message_updated DateTime
-    active Boolean @default(true)
+    status String @default("active")
+    active Boolean @default(true)  // do I need to update the message in discord?
 }
 
-model Attack {
+model attack {
     id String @id @default(uuid(7))
     event_id Int @unique
     message_id String @unique
     message_created DateTime
     message_updated DateTime
-    active Boolean @default(true)
+    status String @default("active")
+    active Boolean @default(true) // do I need to update the message in discord?
 }
 
-model Post {
+model war {
     id String @id @default(uuid(7))
     start_time Int
     message_id String @unique
     message_created DateTime
     message_updated DateTime
     active Boolean @default(true)
+    
 }
 
 // update model schema by running:
