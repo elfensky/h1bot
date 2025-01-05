@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const chalk = require('chalk');
 const pino = require('pino');
 //api
-const fetchDefendEvent = require('../api/fetchDefendEvent');
+const fetchDefendEvents = require('../api/fetchDefendEvents');
 const fetchDefendEventById = require('../api/fetchDefendEventById');
 //database
 const {
@@ -28,8 +28,9 @@ const log = pino({
 async function updateDefend(channel) {
     const start = performance.now();
 
-    const api = await fetchDefendEvent().then((response) => response.data); //api - get most recent data
+    const api = await fetchDefendEvents().then((response) => response.data); //api - get most recent data
     const chats = await db_getAllActive();
+    let deleted;
 
     try {
         api.forEach(async (defend) => {
@@ -57,6 +58,7 @@ async function updateDefend(channel) {
 
             //update existing chat
             if (chat && chat.active) {
+                deleted = chat.event_id; //precaution if the message has been deleted, variable will be used in the catch block below
                 const message = await channel.messages.fetch(chat.message_id); // fetch message from discord by id -> this will error if the message is deleted
                 const content = generate_defence_message(defend, chat); // create message content
                 const update = await message.edit(content); // update the message with new content
@@ -76,7 +78,7 @@ async function updateDefend(channel) {
     } catch (error) {
         if (error.constructor.name === 'DiscordAPIError') {
             if (error.message === 'Unknown Message') {
-                const event = await db_setInactive(exists.event_id); // set deleted message to inactive
+                await db_setInactive(deleted); // set deleted message to inactive
             }
             log.info(
                 chalk.cyan('defend.js') +

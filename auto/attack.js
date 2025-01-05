@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const chalk = require('chalk');
 const pino = require('pino');
 //api
-const fetchActiveAttackEvents = require('../api/fetchActiveAttackEvents');
+const fetchAttackEvents = require('../api/fetchAttackEvents');
 const fetchAttackEventById = require('../api/fetchAttackEventById');
 //database
 const {
@@ -27,76 +27,66 @@ const log = pino({
 async function updateAttack(channel) {
     const start = performance.now();
 
+    const api = await fetchAttackEvents().then((response) => response.data); //api - get most recent data
+    const chats = await db_getAllActive();
+    let deleted;
+
     try {
-        const api = await fetchActiveAttackEvents().then(
-            (response) => response.data
-        );
-        const chats = await db_getAllActive();
-        console.log('api', api.length);
-        console.log('chats', chats.length);
-        if (api && api.length > 0) {
-            //there are active events in the api, update them all.
-            api.forEach(async (attack) => {
-                const chat = chats.find(
-                    (item) => item.event_id === attack.event_id
+        api.forEach(async (attack) => {
+            //find existing chat
+            const chat = chats.find(
+                (item) => item.event_id === attack.event_id
+            );
+
+            //if not in db and active, post and db_save new chat
+            if (!chat && attack.status === 'active') {
+                const content = generate_defence_message(api); // create message content
+                const message = await channel.send(content); // post message to discord (returns message object)
+                const event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
+                log.info(
+                    chalk.cyan('attack.js') +
+                        chalk.white(' updateAttack() created event(') +
+                        chalk.yellow(event.event_id) +
+                        ') in ' +
+                        chalk.blue(
+                            (performance.now() - start).toFixed(3) + ' ms'
+                        )
                 );
+                return;
+            }
 
-                if (!chat) {
-                    //if no matching event from database, post a new message
-                    const content = generate_attack_message(attack); // create message content
-                    const message = await channel.send(content); // post message to discord (returns message object)
-                    const event = await db_SaveEvent(
-                        attack.event_id,
-                        message.id
-                    ); // save event with --linked messageId --- to database
-                    log.info(
-                        chalk.cyan('attack.js') +
-                            chalk.white(
-                                ' updateAttack() created new message '
-                            ) +
-                            chalk.yellow(event.event_id) +
-                            ' ' +
-                            chalk.blue(
-                                (performance.now() - start).toFixed(3) + ' ms'
-                            )
-                    );
-                    return;
-                } else {
-                    //update existing message if there is a matching event in the database
-                    const discord = await channel.messages.fetch(
-                        chat.message_id
-                    ); // fetch message from discord by id
-                    const content = generate_attack_message(attack, chat);
-                    const update = await discord.edit(content);
-                    const event = await db_updateEvent(chat);
-                }
-            });
-        } else {
-            chats.forEach(async (chat) => {
-                const discord = await channel.messages.fetch(chat.message_id); // fetch message from discord by id
-
-         Ongoing       const item = await fetchAttackEventById(chat.event_id).then(
-                    (response) => response.data
+            //update existing chat
+            if (chat && chat.active) {
+                deleted = chat.event_id; //precaution if the message has been deleted, variable will be used in the catch block below
+                const message = await channel.messages.fetch(chat.message_id); // fetch message from discord by id -> this will error if the message is deleted
+                const content = generate_defence_message(attack, chat); // create message content
+                const update = await message.edit(content); // update the message with new content
+                const event = await db_updateEvent(attack); // update the database record
+                log.info(
+                    chalk.cyan('attack.js') +
+                        chalk.white(' updateAttack() updated event(') +
+                        chalk.yellow(event.event_id) +
+                        ') in ' +
+                        chalk.blue(
+                            (performance.now() - start).toFixed(3) + ' ms'
+                        )
                 );
-
-                if (!item) {
-                    console.log('item not found', chat);
-                    return;
-                }
-
-                const content = generate_attack_message(item, chat); // create message content
-                const update = await discord.edit(content);
-                const event = await db_updateEvent(item);
-            });
-        }
+                return;
+            }
+        });
     } catch (error) {
         if (error.constructor.name === 'DiscordAPIError') {
-            log.error(chalk.red('DiscordAPIError'));
-            // if (error.message === 'Unknown Message') {
-            //     const event = await db_setInactive(exists.event_id); // update the database record
-            // }
+            if (error.message === 'Unknown Message') {
+                await db_setInactive(deleted); // set deleted message to inactive
+            }
+            log.info(
+                chalk.cyan('attack.js') +
+                    chalk.white(`updateAttack() set event(`) +
+                    chalk.yellow(exists.event_id) +
+                    chalk.white(') to deleted in ') +
+                    chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+            );
         }
-        log.error(chalk.red(error));
     }
 }
 

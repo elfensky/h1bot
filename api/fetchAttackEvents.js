@@ -2,7 +2,7 @@ const axios = require('axios');
 const https = require('https');
 const FormData = require('form-data');
 
-async function fetchActiveAttackEvents() {
+async function fetchAttackEvents() {
     const host =
         process.env.NODE_ENV === 'production'
             ? 'https://api.helldivers.bot'
@@ -22,4 +22,4 @@ async function fetchActiveAttackEvents() {
     }
 }
 
-module.exports = fetchActiveAttackEvents;
+module.exports = fetchAttackEvents;
