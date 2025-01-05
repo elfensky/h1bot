@@ -109,12 +109,10 @@ async function db_SaveEvent(event_id, message_id) {
 async function db_updateEvent(api) {
     const start = performance.now();
     try {
-        const now = new Date();
-
         const event = await prisma.defend.update({
             where: { event_id: api.event_id },
             data: {
-                message_updated: now,
+                message_updated: new Date(),
                 status: api.status,
                 active: api.status === 'active' ? true : false,
             },

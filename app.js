@@ -118,42 +118,32 @@ client.once(Events.ClientReady, (readyClient) => {
             'Europe/Brussels' // Time zone);
         );
 
-        const defendCleanupCron = new CronJob(
-            '30 * * * *', //once an hour, at 30 minutes of the hour
-            async () => {
-                log.info(
-                    chalk.cyan('crons ') +
-                        chalk.white('- ran defendCleanupCron')
-                );
-
-                await cleanupDefend(channel);
-            },
-            true, // Start the job right now)
-            'Europe/Brussels' // Time zone);
-        );
-
-        // const attackUpdateCron = new CronJob(
-        //     '*/5 * * * * *',
+        // const defendCleanupCron = new CronJob(
+        //     '30 * * * *', //once an hour, at 30 minutes of the hour
         //     async () => {
         //         log.info(
-        //             chalk.cyan('crons ') + chalk.white('- attackUpdateCron')
+        //             chalk.cyan('crons ') +
+        //                 chalk.white('- ran defendCleanupCron')
         //         );
 
-        //         const info = await updateAttack(channel);
-
-        //         log.info(
-        //             chalk.cyan(info.action) +
-        //                 chalk.white(' - ') +
-        //                 chalk.blue(
-        //                     (performance.now() - info.start).toFixed(3) + ' ms'
-        //                 ) +
-        //                 chalk.white(info.message) +
-        //                 chalk.yellow(info.variable)
-        //         );
+        //         await cleanupDefend(channel);
         //     },
         //     true, // Start the job right now)
         //     'Europe/Brussels' // Time zone);
         // );
+
+        const attackUpdateCron = new CronJob(
+            '*/3 * * * * *', //once an hour, at 30 minutes of the hour
+            async () => {
+                log.info(
+                    chalk.cyan('crons ') + chalk.white('- ran attackUpdateCron')
+                );
+
+                await updateAttack(channel);
+            },
+            true, // Start the job right now)
+            'Europe/Brussels' // Time zone);
+        );
     });
 });
 

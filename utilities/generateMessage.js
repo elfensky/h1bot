@@ -45,7 +45,142 @@ function util_generate_progress_bar(percentage) {
     return `${progressBar} ${percentage}%`;
 }
 
-// #region DEFENCE TEXT SECTION GENERATORS
+function util_evaluate_progress(event) {
+    // console.log('event.points_max', event.points_max);
+    // console.log('event.start_time', event.start_time);
+    // console.log('event.end_time', event.end_time);
+    // console.log('event.points', event.points);
+    // Get the current time as a timestamp
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // Calculate total time in milliseconds
+    const totalTime = event.end_time - event.start_time;
+    // console.log('totalTime', totalTime);
+
+    // Calculate elapsed time in milliseconds
+    const elapsedTime = currentTime - event.start_time;
+    // console.log('elapsedTime', elapsedTime);
+
+    // Calculate remaining time in milliseconds
+    const remainingTime = event.end_time - currentTime;
+    // console.log('remainingTime', remainingTime);
+
+    // Calculate the expected rate of progress (points per millisecond)
+    const expectedRate = event.points_max / totalTime;
+
+    // Calculate the current rate of progress (points per millisecond)
+    const currentRate = event.points / elapsedTime;
+
+    // Calculate the expected points by now
+    const expectedPoints = expectedRate * elapsedTime;
+
+    // Calculate the remaining points
+    const remainingPoints = event.points_max - event.points;
+
+    // Calculate the required rate for the remaining time (points per millisecond)
+    const requiredRate = remainingPoints / remainingTime;
+
+    // Determine the progress status
+    let status;
+    if (event.points > expectedPoints) {
+        status = 'pushing ahead';
+    } else if (event.points < expectedPoints) {
+        status = 'falling behind';
+    } else {
+        status = 'on track';
+    }
+
+    // Determine if the current rate is sufficient
+    let rateStatus;
+    if (currentRate >= requiredRate) {
+        rateStatus = 'on track to meet your goal';
+    } else {
+        rateStatus = 'need to increase your rate to meet your goal';
+    }
+
+    let pointDifference = expectedPoints - event.points;
+
+    const progress = {
+        expectedRate: expectedRate.toFixed(6), // Adjust precision as needed
+        currentRate: currentRate.toFixed(6),
+        expectedPoints: expectedPoints.toFixed(0),
+        remainingPoints: remainingPoints.toFixed(0),
+        requiredRate: requiredRate.toFixed(6),
+        status: status,
+        rateStatus: rateStatus,
+    };
+
+    if (event.status === 'active') {
+        return `> We are currently \`${status}\` of schedule by \`${Math.abs(
+            pointDifference.toFixed(0)
+        )}\` points`;
+    } else {
+        return '';
+    }
+}
+
+// #region SHARED GENERATORS
+function shared_progress(event) {
+    const progress =
+        event.points <= event.points_max
+            ? Math.floor((event.points / event.points_max) * 100)
+            : 'n/a';
+    const bar =
+        typeof progress === 'number'
+            ? util_generate_progress_bar(progress)
+            : 'n/a';
+
+    return `> Progress \`${bar}\` \`${event.points}/${event.points_max}\``;
+}
+
+function shared_time_remaining(event, chat) {
+    //setup time
+    const now = new Date();
+    const end = new Date(event.end_time * 1000).getTime();
+    const timestamp = now.getTime();
+    //calculate time remaining
+    const remaining = end - timestamp;
+    const remaining_human = util_milliseconds_to_human_time(remaining);
+    const ended = `<t:${event.end_time}:R>`;
+
+    const message =
+        remaining >= 0
+            ? `> Deadline ${remaining_human} remaining`
+            : `> Event has ended ${ended}`;
+
+    return message;
+}
+
+function shared_debug(event, chat) {
+    const enable_debug = true; //environment === 'development' ? message : '';
+
+    const message_created = chat
+        ? `\`chat started on\` <t:${Math.floor(chat.message_created / 1000)}:F>`
+        : `\`chat started on\` <t:${Math.floor(Date.now() / 1000)}:F>`;
+
+    const message_updated = chat
+        ? `\`last updated on\` <t:${Math.floor(chat.message_updated / 1000)}:R>`
+        : `\`last updated on\` <t:${Math.floor(Date.now() / 1000)}:R>`;
+
+    const message_updated_human = new Date(
+        chat ? chat.message_updated : Date.now()
+    ).toLocaleTimeString('en-US', {
+        timeZone: 'UTC',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    const message = `\n> ${message_created}\n> ${message_updated} (\`${message_updated_human}\`)\n> - \`event_id:\` \`${event.event_id}\``;
+
+    if (enable_debug) {
+        return message;
+    }
+    return '';
+}
+// #endregion
+
+// #region DEFENCE GENERATORS
 function defence_title(event, chat) {
     if (event.status === 'active') {
         if (event.region !== 0) {
@@ -92,79 +227,20 @@ function defence_info(event, chat) {
     }
 }
 
-function defence_progress(event) {
-    const progress =
-        event.points <= event.points_max
-            ? Math.floor((event.points / event.points_max) * 100)
-            : 'n/a';
-    const bar =
-        typeof progress === 'number'
-            ? util_generate_progress_bar(progress)
-            : 'n/a';
-
-    return `> Progress \`${bar}\` \`${event.points}/${event.points_max}\``;
-}
-
-function defence_time_remaining(event, chat) {
-    //setup time
-    const now = new Date();
-    const end = new Date(event.end_time * 1000).getTime();
-    const timestamp = now.getTime();
-    //calculate time remaining
-    const remaining = end - timestamp;
-    const remaining_human = util_milliseconds_to_human_time(remaining);
-
-    const ended = new Date(event.end_time * 1000).toLocaleString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
-    const message =
-        remaining >= 0
-            ? `> Deadline ${remaining_human} remaining`
-            : `> Defend Event has ended at \`${ended}\` UTC+0`;
-
-    return message;
-}
-
-function defence_debug(event, chat) {
-    const message_created = chat
-        ? `\`chat started on\` <t:${Math.floor(chat.message_created / 1000)}:F>`
-        : `\`chat started on\` <t:${Math.floor(Date.now() / 1000)}:F>`;
-
-    const message_updated = chat
-        ? `\`last updated on\` <t:${Math.floor(chat.message_updated / 1000)}:R>`
-        : `\`last updated on\` <t:${Math.floor(Date.now() / 1000)}:R>`;
-
-    const message_updated_human = new Date(
-        chat ? chat.message_updated : Date.now()
-    ).toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
-
-    const message = `\n${message_created}\n${message_updated} (\`${message_updated_human}\`)\n- \`event_id:\` \`${event.event_id}\``;
-    return message;
-}
-// #endregion
-
-// #region DEFEND MESSAGE
 function generate_defence_message(event, chat) {
     try {
         const message_title = defence_title(event, chat);
         const message_info = defence_info(event, chat);
-        const message_progress = defence_progress(event);
-        const message_time_remaining = defence_time_remaining(event, chat);
-        const message_debug =
-            environment === 'development' ? defence_debug(event, chat) : '';
+        const message_progress = shared_progress(event);
+        const message_time_remaining = shared_time_remaining(event, chat);
+        const message_eval = util_evaluate_progress(event);
+        const message_debug = shared_debug(event, chat);
 
-        const message = `${message_title}
-                ${message_info}
+        const message = `
+                ${message_title}\n${message_info}
                 ${message_progress}
                 ${message_time_remaining}
+                ${message_eval}
                 ${message_debug}
                 `;
         return message;
@@ -174,87 +250,60 @@ function generate_defence_message(event, chat) {
 }
 // #endregion
 
-// #region ATTACK MESSAGE
-function attackMessage(event, chat) {
-    //setup time
-    const now = new Date();
-    const message_created_human = new Date(
-        chat ? chat.message_created : Date.now()
-    ).toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-    const message_updated_human = new Date(
-        chat ? chat.message_updated : Date.now()
-    ).toLocaleTimeString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
-    const end = new Date(event.end_time * 1000).getTime();
-    const timestamp = now.getTime();
-    //calculate time remaining
-    const remaining = end - timestamp;
-    const remaining_human = util_milliseconds_to_human_time(remaining);
-    const progress =
-        event.points <= event.points_max
-            ? Math.floor((event.points / event.points_max) * 100)
-            : 'NaN';
-    const bar = util_generate_progress_bar(progress);
-
+// #region ATTACK GENERATORS
+function attack_title(event, chat) {
     if (event.status === 'active') {
-        const message = `
-<@&1322659004056338533>\n
-**🗡️🌎 A PLANETARY ASSAULT HAS BEGUN**
-
-**All forces must converge on ${worlds[event.enemy]}!**
-
-Progress: \`${bar}\`
-Points: \`${event.points}/${event.points_max}\`
-Time: ${remaining_human} remaining
-
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
-        return message;
-    }
-
-    if (event.status === 'fail') {
-        const message = `
-<@&1322659004056338533>\n
-**🗡️💀 SHAMEFUL DEFEAT**
-
-**Our glorious democratic assault** on ${
-            worlds[event.enemy]
-        } has been thwarted by **${enemies[event.enemy]}**
-Progress: \`${bar}\`
-Points: \`${event.points}/${event.points_max}\`
-
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
-        return message;
+        return `**:dagger: <@&1322659004056338533> ASSAULT ON AN ENEMY HOMEWORLD HAS BEGUN!**`;
     }
 
     if (event.status === 'success') {
-        const message = `
-<@&1322659004056338533>\n
-**🗡️🕊️ PACIFICATION COMPLETE**
+        return `**:dagger: <@&1322659004056338533> AN ENEMY HOMEWORLD HAS FALLEN!**`;
+    }
 
-**Helldivers** have successfully defeated the ${enemies[event.enemy]} on ${
+    if (event.status === 'fail') {
+        return `**:dagger: <@&1322659004056338533> ENEMY HOMEWORLD STANDS STRONG!**`;
+    }
+}
+
+function attack_info(event, chat) {
+    if (event.status === 'active') {
+        return `> **All forces must converge on ${worlds[event.enemy]}!**`;
+    }
+
+    if (event.status === 'success') {
+        return `> **Helldivers** have successfully defeated the ${
+            enemies[event.enemy]
+        } on ${worlds[event.enemy]}`;
+    }
+
+    if (event.status === 'fail') {
+        return `> **Our glorious democratic assault** on ${
             worlds[event.enemy]
-        }
-Progress: \`${bar}\`
-Points: \`${event.points}/${event.points_max}\`
+        } has been thwarted by **${enemies[event.enemy]}**`;
+    }
+}
 
-\`message created\` at \`${message_created_human} UTC+0\`
-\`message updated\` at \`${message_updated_human} UTC+0\` \n
-        `;
+function generate_attack_message(event, chat) {
+    try {
+        const message_title = attack_title(event, chat);
+        const message_info = attack_info(event, chat);
+        const message_progress = shared_progress(event);
+        const message_time_remaining = shared_time_remaining(event, chat);
+        const message_eval = util_evaluate_progress(event);
+        const message_debug = shared_debug(event, chat);
+
+        const message = `
+                ${message_title}\n${message_info}
+                ${message_progress}
+                ${message_time_remaining}
+                ${message_eval}
+                ${message_debug}\n\n
+                `;
         return message;
+    } catch (error) {
+        console.error('error', error);
     }
 }
 // #endregion
 
-module.exports = { generate_defence_message, attackMessage };
+module.exports = { generate_defence_message, generate_attack_message };

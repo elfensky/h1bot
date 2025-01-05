@@ -37,7 +37,7 @@ model war {
     message_id String @unique
     message_created DateTime
     message_updated DateTime
-    active Boolean @default(true)
+    active Boolean @default(true) //rename to ongoing? 
     
 }
 

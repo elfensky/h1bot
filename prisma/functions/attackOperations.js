@@ -53,6 +53,26 @@ async function db_getEventById(id) {
     }
 }
 
+async function db_getAllActive() {
+    const start = performance.now();
+    try {
+        const events = await prisma.attack.findMany({
+            where: { active: true },
+        });
+
+        log.info(
+            chalk.cyan('defendOperations.js') +
+                chalk.white(' - ran db_getAllActive() in ') +
+                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        );
+
+        return events;
+    } catch (error) {
+        log.error(chalk.red('db_getAllActive() crashed: \n') + error.message);
+        throw error;
+    }
+}
+
 async function db_SaveEvent(eventId, messageId) {
     const start = performance.now();
     try {
@@ -84,23 +104,22 @@ async function db_SaveEvent(eventId, messageId) {
     }
 }
 
-async function db_updateEvent(id, status) {
+async function db_updateEvent(api) {
     const start = performance.now();
     try {
-        const now = new Date();
-
         const event = await prisma.attack.update({
-            where: { event_id: id },
+            where: { event_id: api.event_id },
             data: {
-                message_updated: now,
-                active: status,
+                message_updated: new Date(),
+                status: api.status,
+                active: api.status === 'active' ? true : false,
             },
         });
 
         log.info(
-            chalk.cyan('prisma') +
+            chalk.cyan('attackOperations.js') +
                 chalk.white(' - ran db_updateEvent(') +
-                chalk.yellow(id) +
+                chalk.yellow(event.event_id) +
                 chalk.white(') in ') +
                 chalk.blue((performance.now() - start).toFixed(3) + ' ms')
         );
@@ -115,6 +134,7 @@ async function db_updateEvent(id, status) {
 module.exports = {
     db_getEvent,
     db_getEventById,
+    db_getAllActive,
     db_SaveEvent,
     db_updateEvent,
 };

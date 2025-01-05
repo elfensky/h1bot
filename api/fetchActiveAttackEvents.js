@@ -2,14 +2,11 @@ const axios = require('axios');
 const https = require('https');
 const FormData = require('form-data');
 
-async function getEvent() {
+async function fetchActiveAttackEvents() {
     const host =
         process.env.NODE_ENV === 'production'
             ? 'https://api.helldivers.bot'
             : 'http://127.0.0.1:3000';
-
-    // const url = 'http://127.0.0.1:3000/v1/event';
-    // const url = 'https://api.helldivers.bot/v1/event'; // The API URL you want to ping
     const url = `${host}/bot/attack`;
 
     try {
@@ -25,4 +22,4 @@ async function getEvent() {
     }
 }
 
-module.exports = getEvent;
+module.exports = fetchActiveAttackEvents;

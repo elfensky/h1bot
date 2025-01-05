@@ -29,59 +29,54 @@ async function updateDefend(channel) {
     const start = performance.now();
 
     const api = await fetchDefendEvent().then((response) => response.data); //api - get most recent data
-    const exists = await db_getEventById(api.event_id);
+    const chats = await db_getAllActive();
 
-    // #region ALWAYS CREATE A NEW POST OR UPDATE THE LATEST EVENT
     try {
-        if (!exists) {
-            //if no event in database this is a completely new event.
-            // It's always new, and should always be posted, because it's the LATEST event, no matter its status.
-
-            //start discord.js
-            const content = generate_defence_message(api); // create message content
-            const message = await channel.send(content); // post message to discord (returns message object)
-            //start prisma
-            const event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
-
-            log.info(
-                chalk.cyan('defend.js') +
-                    chalk.white(' updateDefend() created new message ') +
-                    chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        api.forEach(async (defend) => {
+            //find existing chat
+            const chat = chats.find(
+                (item) => item.event_id === defend.event_id
             );
-        } else {
-            // this event was already posted.
-            // if it's active, update the discord message and database record.
-            if (exists.active) {
-                //start prisma
-                const event = await db_updateEvent(api); // update the database record
-                //start discord.js
-                const content = generate_defence_message(api, event); // create message content
-                const message = await channel.messages.fetch(event.message_id); // fetch message from discord by id
-                const update = await message.edit(content); // update the message with new content
 
+            //if not in db and active, post and db_save new chat
+            if (!chat && defend.status === 'active') {
+                const content = generate_defence_message(api); // create message content
+                const message = await channel.send(content); // post message to discord (returns message object)
+                const event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
                 log.info(
                     chalk.cyan('defend.js') +
-                        chalk.white(
-                            ' updateDefend() updated existing message '
-                        ) +
+                        chalk.white(' updateDefend() created event(') +
+                        chalk.yellow(event.event_id) +
+                        ') in ' +
                         chalk.blue(
                             (performance.now() - start).toFixed(3) + ' ms'
                         )
                 );
-            } else {
-                log.info(
-                    chalk.cyan('defend.js') +
-                        chalk.white(' updateDefend() current event is over ') +
-                        chalk.blue(
-                            (performance.now() - start).toFixed(3) + ' ms'
-                        )
-                );
+                return;
             }
-        }
+
+            //update existing chat
+            if (chat && chat.active) {
+                const message = await channel.messages.fetch(chat.message_id); // fetch message from discord by id -> this will error if the message is deleted
+                const content = generate_defence_message(defend, chat); // create message content
+                const update = await message.edit(content); // update the message with new content
+                const event = await db_updateEvent(defend); // update the database record
+                log.info(
+                    chalk.cyan('defend.js') +
+                        chalk.white(' updateDefend() updated event(') +
+                        chalk.yellow(event.event_id) +
+                        ') in ' +
+                        chalk.blue(
+                            (performance.now() - start).toFixed(3) + ' ms'
+                        )
+                );
+                return;
+            }
+        });
     } catch (error) {
         if (error.constructor.name === 'DiscordAPIError') {
             if (error.message === 'Unknown Message') {
-                const event = await db_setInactive(exists.event_id); // update the database record
+                const event = await db_setInactive(exists.event_id); // set deleted message to inactive
             }
             log.info(
                 chalk.cyan('defend.js') +
@@ -92,11 +87,6 @@ async function updateDefend(channel) {
             );
         }
     }
-    // #endregion
-
-    // const is_active = api.status === 'active' ? true : false; //status
-    //database - get the most recent event
-    // const list = await db_getAllActive().then((response) => response.data); //api - get most recent data
 }
 
 async function cleanupDefend(channel) {
