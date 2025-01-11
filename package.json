@@ -28,7 +28,7 @@
         "start": "NODE_ENV=production node app.js"
     },
     "dependencies": {
-        "@prisma/client": "^6.1.0",
+        "@prisma/client": "^6.2.1",
         "@sentry/node": "^8.48.0",
         "@sentry/profiling-node": "^8.47.0",
         "axios": "^1.7.9",
