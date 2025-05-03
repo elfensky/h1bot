@@ -38,18 +38,13 @@ function util_generate_progress_bar(percentage) {
     const full = '■'; //■ //✅ //▰
     const empty = '□'; //□ //☑️ //▱
 
-    const progressBar =
-        full.repeat(filledBlocks) + empty.repeat(totalBlocks - filledBlocks);
+    const progressBar = full.repeat(filledBlocks) + empty.repeat(totalBlocks - filledBlocks);
 
     // Return the progress bar with the percentage
     return `${progressBar} ${percentage}%`;
 }
 
 function util_evaluate_progress(event) {
-    // console.log('event.points_max', event.points_max);
-    // console.log('event.start_time', event.start_time);
-    // console.log('event.end_time', event.end_time);
-    // console.log('event.points', event.points);
     // Get the current time as a timestamp
     const currentTime = Math.floor(Date.now() / 1000);
 
@@ -80,9 +75,11 @@ function util_evaluate_progress(event) {
     // Calculate the required rate for the remaining time (points per millisecond)
     const requiredRate = remainingPoints / remainingTime;
 
+    // 10% buffer
+    const buffer = expectedPoints * 0.1;
     // Determine the progress status
     let status;
-    if (event.points > expectedPoints) {
+    if (event.points > expectedPoints + buffer) {
         status = 'pushing ahead';
     } else if (event.points < expectedPoints) {
         status = 'falling behind';
@@ -98,7 +95,7 @@ function util_evaluate_progress(event) {
         rateStatus = 'need to increase your rate to meet your goal';
     }
 
-    let pointDifference = expectedPoints - event.points;
+    let pointDifference = Math.abs(expectedPoints - event.points);
 
     const progress = {
         expectedRate: expectedRate.toFixed(6), // Adjust precision as needed
@@ -111,24 +108,23 @@ function util_evaluate_progress(event) {
     };
 
     if (event.status === 'active') {
-        return `> We are currently \`${status}\` of schedule by \`${Math.abs(
-            pointDifference.toFixed(0)
-        )}\` points`;
-    } else {
-        return '';
+        return `> We are currently \`${status}\` by \`${pointDifference.toFixed(0)}\` points`;
+    }
+    if (event.status === 'success') {
+        const remaining_minutes = 120 - Math.floor(elapsedTime / 60);
+        const win_text = remaining_minutes > 1 ? `${remaining_minutes} minutes` : `${remaining_minutes} minute`;
+
+        return `> We have \`won\` with \`${win_text}\` to spare.`;
+    }
+    if (event.status === 'failure') {
+        return `> We have \`lost\` by \`${pointDifference.toFixed(0)}\` points`;
     }
 }
 
 // #region SHARED GENERATORS
 function shared_progress(event) {
-    const progress =
-        event.points <= event.points_max
-            ? Math.floor((event.points / event.points_max) * 100)
-            : 'n/a';
-    const bar =
-        typeof progress === 'number'
-            ? util_generate_progress_bar(progress)
-            : 'n/a';
+    const progress = event.points <= event.points_max ? Math.floor((event.points / event.points_max) * 100) : 'n/a';
+    const bar = typeof progress === 'number' ? util_generate_progress_bar(progress) : 'n/a';
 
     return `> Progress \`${bar}\` \`${event.points}/${event.points_max}\``;
 }
@@ -138,15 +134,13 @@ function shared_time_remaining(event, chat) {
     const now = new Date();
     const end = new Date(event.end_time * 1000).getTime();
     const timestamp = now.getTime();
-    //calculate time remaining
+    // //calculate time remaining
     const remaining = end - timestamp;
-    const remaining_human = util_milliseconds_to_human_time(remaining);
-    const ended = `<t:${event.end_time}:R>`;
+    // const remaining_human = util_milliseconds_to_human_time(remaining);
+    // const ended = `<t:${event.end_time}:R>`;
+    const time = `<t:${event.end_time}:R>`;
 
-    const message =
-        remaining >= 0
-            ? `> Deadline ${remaining_human} remaining`
-            : `> Event has ended ${ended}`;
+    const message = remaining >= 0 ? `> Due ${time}` : `> Event has ended ${time}`;
 
     return message;
 }
@@ -162,9 +156,7 @@ function shared_debug(event, chat) {
         ? `\`last updated on\` <t:${Math.floor(chat.message_updated / 1000)}:R>`
         : `\`last updated on\` <t:${Math.floor(Date.now() / 1000)}:R>`;
 
-    const message_updated_human = new Date(
-        chat ? chat.message_updated : Date.now()
-    ).toLocaleTimeString('en-US', {
+    const message_updated_human = new Date(chat ? chat.message_updated : Date.now()).toLocaleTimeString('en-US', {
         timeZone: 'UTC',
         hour: '2-digit',
         minute: '2-digit',
@@ -209,21 +201,19 @@ function defence_title(event, chat) {
 
 function defence_info(event, chat) {
     if (event.status === 'active') {
-        return `> **${enemies[event.enemy]}** are attacking the **${
-            map[event.enemy][event.region]
-        }** `;
+        return `> **${enemies[event.enemy]}** are attacking the **${map[event.enemy][event.region]}** `;
     }
 
     if (event.status === 'success') {
-        return `> Helldivers have **repelled** the **${
-            enemies[event.enemy]
-        }** in the **${map[event.enemy][event.region]}**`;
+        return `> Helldivers have **repelled** the **${enemies[event.enemy]}** in the **${
+            map[event.enemy][event.region]
+        }**`;
     }
 
     if (event.status === 'failure') {
-        return `> Helldivers have been **defeated** by **${
-            enemies[event.enemy]
-        }** in the **${map[event.enemy][event.region]}**`;
+        return `> Helldivers have been **defeated** by **${enemies[event.enemy]}** in the **${
+            map[event.enemy][event.region]
+        }**`;
     }
 }
 
@@ -232,15 +222,13 @@ function generate_defence_message(event, chat) {
         const message_title = defence_title(event, chat);
         const message_info = defence_info(event, chat);
         const message_progress = shared_progress(event);
-        const message_time_remaining = shared_time_remaining(event, chat);
         const message_eval = util_evaluate_progress(event);
+        const message_time_remaining = shared_time_remaining(event, chat);
         const message_debug = shared_debug(event, chat);
 
-        const message = `
+        const message = `\n
                 ${message_title}\n${message_info}
-                ${message_progress}
-                ${message_time_remaining}
-                ${message_eval}
+                ${message_progress}\n${message_eval}\n${message_time_remaining}
                 ${message_debug}
                 `;
         return message;
@@ -271,15 +259,13 @@ function attack_info(event, chat) {
     }
 
     if (event.status === 'success') {
-        return `> **Helldivers** have successfully defeated the ${
-            enemies[event.enemy]
-        } on ${worlds[event.enemy]}`;
+        return `> **Helldivers** have successfully defeated the ${enemies[event.enemy]} on ${worlds[event.enemy]}`;
     }
 
     if (event.status === 'fail') {
-        return `> **Our glorious democratic assault** on ${
-            worlds[event.enemy]
-        } has been thwarted by **${enemies[event.enemy]}**`;
+        return `> **Our glorious democratic assault** on ${worlds[event.enemy]} has been thwarted by **${
+            enemies[event.enemy]
+        }**`;
     }
 }
 
@@ -294,11 +280,10 @@ function generate_attack_message(event, chat) {
 
         const message = `
                 ${message_title}\n${message_info}
-                ${message_progress}
-                ${message_time_remaining}
-                ${message_eval}
-                ${message_debug}\n\n
+                ${message_progress}\n${message_eval}\n${message_time_remaining}                
+                ${message_debug}
                 `;
+
         return message;
     } catch (error) {
         console.error('error', error);

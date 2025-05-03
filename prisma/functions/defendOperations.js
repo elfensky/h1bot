@@ -19,11 +19,11 @@ async function db_getEvent() {
             },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_getEvent() in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_getEvent() in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {
@@ -39,13 +39,13 @@ async function db_getEventById(id) {
             where: { event_id: id },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_getEventById(') +
-                chalk.yellow(id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_getEventById(') +
+        //         chalk.yellow(id) +
+        //         chalk.white(') in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {
@@ -61,11 +61,11 @@ async function db_getAllActive() {
             where: { active: true },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_getAllActive() in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_getAllActive() in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return events;
     } catch (error) {
@@ -75,6 +75,7 @@ async function db_getAllActive() {
 }
 
 async function db_SaveEvent(event_id, message_id) {
+    console.log('db_SaveEvent', event_id, message_id);
     const start = performance.now();
     try {
         const now = new Date();
@@ -91,13 +92,13 @@ async function db_SaveEvent(event_id, message_id) {
             },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_SaveEvent(') +
-                chalk.yellow(`${event_id}, ${message_id}`) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_SaveEvent(') +
+        //         chalk.yellow(`${event_id}, ${message_id}`) +
+        //         chalk.white(') in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {
@@ -118,13 +119,13 @@ async function db_updateEvent(api) {
             },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_updateEvent(') +
-                chalk.yellow(event.event_id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_updateEvent(') +
+        //         chalk.yellow(event.event_id) +
+        //         chalk.white(') in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {
@@ -146,13 +147,13 @@ async function db_setInactive(event_id) {
             },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_setInactive(') +
-                chalk.yellow(event_id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_setInactive(') +
+        //         chalk.yellow(event_id) +
+        //         chalk.white(') in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {
@@ -175,13 +176,13 @@ async function db_upsertEvent(event_id, data) {
             },
         });
 
-        log.info(
-            chalk.cyan('defendOperations.js') +
-                chalk.white(' - ran db_upsertEvent(') +
-                chalk.yellow(event_id) +
-                chalk.white(') in ') +
-                chalk.blue((performance.now() - start).toFixed(3) + ' ms')
-        );
+        // log.info(
+        //     chalk.cyan('defendOperations.js') +
+        //         chalk.white(' - ran db_upsertEvent(') +
+        //         chalk.yellow(event_id) +
+        //         chalk.white(') in ') +
+        //         chalk.blue((performance.now() - start).toFixed(3) + ' ms')
+        // );
 
         return event;
     } catch (error) {

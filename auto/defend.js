@@ -27,9 +27,26 @@ const log = pino({
 
 async function updateDefend(channel) {
     const start = performance.now();
+    log.info(chalk.cyan('defend.js - (1/X) ') + chalk.white('- started...'));
 
-    const api = await fetchDefendEvents().then((response) => response.data); //api - get most recent data
-    const chats = await db_getAllActive();
+    const api = await fetchDefendEvents().then((response) => {
+        log.info(
+            chalk.cyan('defend.js - (2/X) ') + chalk.white('- fetched api data')
+        );
+        if (!response) {
+            log.error('defend.js - (2/X) - error');
+            return;
+        } else {
+            return response.data;
+        }
+    }); //api - get most recent data
+    const chats = await db_getAllActive().then((response) => {
+        log.info(
+            chalk.cyan('defend.js - (3/X) ') +
+                chalk.white('- fetched local data')
+        );
+        return response;
+    });
     let deleted;
 
     try {
@@ -41,9 +58,9 @@ async function updateDefend(channel) {
 
             //if not in db and active, post and db_save new chat
             if (!chat && defend.status === 'active') {
-                const content = generate_defence_message(api); // create message content
+                const content = generate_defence_message(defend); // create message content
                 const message = await channel.send(content); // post message to discord (returns message object)
-                const event = await db_SaveEvent(api.event_id, message.id); // save event with --linked messageId --- to database
+                const event = await db_SaveEvent(defend.event_id, message.id); // save event with --linked messageId --- to database
                 log.info(
                     chalk.cyan('defend.js') +
                         chalk.white(' updateDefend() created event(') +
@@ -88,6 +105,8 @@ async function updateDefend(channel) {
                     chalk.blue((performance.now() - start).toFixed(3) + ' ms')
             );
         }
+        log.error('defend.js - (X/X) - error');
+        // log.info(error.constructor.name);
     }
 }
 

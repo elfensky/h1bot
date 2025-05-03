@@ -21,7 +21,9 @@ async function fetchDefendEvents() {
         // console.log('Response:', data);
     } catch (error) {
         console.error('Error pinging API:', error);
-        throw error; // Re-throw the error if you want to handle it outside
+        return null;
+        // log.error(error.constructor.name);
+        // throw error; // Re-throw the error if you want to handle it outside
     }
 }
 

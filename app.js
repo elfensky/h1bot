@@ -1,5 +1,5 @@
 // logs, monitoring, etc
-require('./sentry.js'); //sentry.io
+// require('./sentry.js'); //sentry.io //commented during development
 const pino = require('pino'); //low overhead nodejs logger
 const chalk = require('chalk'); //colorful terminal output
 // dependencies
@@ -106,13 +106,14 @@ client.once(Events.ClientReady, (readyClient) => {
         };
 
         const defendUpdateCron = new CronJob(
-            '*/3 * * * * *', //every 15 seconds
+            '*/15 * * * * *', //every 15 seconds
             async () => {
-                log.info(
-                    chalk.cyan('crons ') + chalk.white('- ran defendUpdateCron')
-                );
-
-                await updateDefend(channel);
+                await updateDefend(channel).then((response) => {
+                    log.info(
+                        chalk.cyan('crons ') +
+                            chalk.white('- ran defendUpdateCron')
+                    );
+                });
             },
             true, // Start the job right now)
             'Europe/Brussels' // Time zone);
@@ -132,18 +133,19 @@ client.once(Events.ClientReady, (readyClient) => {
         //     'Europe/Brussels' // Time zone);
         // );
 
-        // const attackUpdateCron = new CronJob(
-        //     '*/3 * * * * *', //once an hour, at 30 minutes of the hour
-        //     async () => {
-        //         log.info(
-        //             chalk.cyan('crons ') + chalk.white('- ran attackUpdateCron')
-        //         );
-
-        //         await updateAttack(channel);
-        //     },
-        //     true, // Start the job right now)
-        //     'Europe/Brussels' // Time zone);
-        // );
+        const attackUpdateCron = new CronJob(
+            '*/15 * * * * *', //once an hour, at 30 minutes of the hour
+            async () => {
+                await updateAttack(channel).then((response) => {
+                    log.info(
+                        chalk.cyan('crons ') +
+                            chalk.white('- ran attackUpdateCron')
+                    );
+                });
+            },
+            true, // Start the job right now)
+            'Europe/Brussels' // Time zone);
+        );
     });
 });
 

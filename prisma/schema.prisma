@@ -44,7 +44,7 @@ model war {
 // update model schema by running:
 
 // update the database schema
-// -> npx prisma migrate dev --name "name or description"
+// -> npx prisma migrate dev --name "initialize"
 
 // apply db schema on prod 
 // -> npx prisma migrate deploy

@@ -25,7 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
--   bumped cron from 3.3.1 to 3.3.2 - by @dependabot
+-   Bump cron from 3.3.1 to 3.3.2 - by @dependabot
+-   Bump @sentry/node from 8.47.0 to 8.48.0 - by @dependabot
+-   Bump @sentry/profiling-node from 8.47.0 to 8.48.0 - by @dependabot
+-   Bump prisma from 6.1.0 to 6.2.1 - by @dependabot
+-   Bump @prisma/client from 6.1.0 to 6.2.1 - by @dependabot
+-   Bump discord.js from 14.16.3 to 14.17.3 - by @dependabot
 
 ## [0.3.0] - 2025-01-02
 
